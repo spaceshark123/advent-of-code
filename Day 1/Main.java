@@ -4,8 +4,8 @@ import java.lang.*;
 
 class Main {
 	public static void main(String[] args) throws IOException {
-		// read input from file day1.txt
-		Kattio io = new Kattio("day1");
+		// read input from file
+		Kattio io = new Kattio("day1_1");
 		
 		
 
