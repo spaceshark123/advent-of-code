@@ -3,23 +3,68 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static final int LENGTH = 1000;
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
-		Kattio io = new Kattio("day1_1");
-		
-		
+		Kattio io = new Kattio("day1", System.out);
+
+		// input
+		int[] arr1 = new int[LENGTH];
+		int[] arr2 = new int[LENGTH];
+		for (int i = 0; i < LENGTH; i++) {
+			arr1[i] = io.getInt();
+			arr2[i] = io.getInt();
+		}
+
+		//pair up the numbers in increasing order
+		Arrays.sort(arr1);
+		Arrays.sort(arr2);
+
+		//part 1
+		int diffs = part1(arr1, arr2);
+		io.println(diffs);
+
+		//part 2
+		int cnt = part2(arr1, arr2);
+		io.println(cnt);
 
 		io.close();
-  	}
+	}
+
+	static int part1(int[] arr1, int[] arr2) {
+		int diffs = 0;
+		for (int i = 0; i < LENGTH; i++) {
+			diffs += Math.abs(arr1[i] - arr2[i]);
+		}
+		return diffs;
+	}
+	
+	static int part2(int[] arr1, int[] arr2) {
+		int cnt = 0;
+		for (int i = 0; i < LENGTH; i++) {
+			cnt += arr1[i] * count(arr2, arr1[i]);
+		}
+		return cnt;
+	}
+	
+	static int count(int[] arr, int n) {
+		int count = 0;
+		for(int i = 0; i < arr.length; i++) {
+			if(arr[i] == n)
+				count++;
+		}
+		return count;
+	}
 
 	static class Kattio extends PrintWriter {
 		public Kattio(InputStream i) {
-		super(new BufferedOutputStream(System.out));
-		r = new BufferedReader(new InputStreamReader(i));
+			super(new BufferedOutputStream(System.out));
+			r = new BufferedReader(new InputStreamReader(i));
 		}
 		public Kattio(InputStream i, OutputStream o) {
-		super(new BufferedOutputStream(o));
-		r = new BufferedReader(new InputStreamReader(i));
+			super(new BufferedOutputStream(o));
+			r = new BufferedReader(new InputStreamReader(i));
 		}
 		public Kattio(String problemName) throws FileNotFoundException {
 			super(new BufferedOutputStream(new FileOutputStream(problemName + ".out")));
@@ -30,25 +75,34 @@ class Main {
 				throw e; // Re-throw the exception to notify the caller
 			}
 		}
+		public Kattio(String problemName, OutputStream o) throws FileNotFoundException {
+			super(new BufferedOutputStream(o));
+			try {
+				r = new BufferedReader(new FileReader(problemName + ".in"));
+			} catch (FileNotFoundException e) {
+				System.err.println("Input file not found: " + problemName + ".in");
+				throw e; // Re-throw the exception to notify the caller
+			}
+		}
 
 		public boolean hasMoreTokens() {
-		return peekToken() != null;
+			return peekToken() != null;
 		}
 
 		public int getInt() {
-		return Integer.parseInt(nextToken());
+			return Integer.parseInt(nextToken());
 		}
 
 		public double getDouble() { 
-		return Double.parseDouble(nextToken());
+			return Double.parseDouble(nextToken());
 		}
 
 		public long getLong() {
-		return Long.parseLong(nextToken());
+			return Long.parseLong(nextToken());
 		}
 
 		public String getWord() {
-		return nextToken();
+			return nextToken();
 		}
 
 		private BufferedReader r;
@@ -57,16 +111,16 @@ class Main {
 		private String token;
 
 		private String peekToken() {
-		if (token == null) 
-			try {
-			while (st == null || !st.hasMoreTokens()) {
-				line = r.readLine();
-				if (line == null) return null;
-				st = new StringTokenizer(line);
-			}
-			token = st.nextToken();
-			} catch (IOException e) { }
-		return token;
+			if (token == null) 
+				try {
+				while (st == null || !st.hasMoreTokens()) {
+					line = r.readLine();
+					if (line == null) return null;
+					st = new StringTokenizer(line);
+				}
+				token = st.nextToken();
+				} catch (IOException e) { }
+			return token;
 		}
 
 		private String nextToken() {
