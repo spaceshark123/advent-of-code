@@ -280,55 +280,88 @@ class Main {
 		//syntax for creating: PermIterator it = new PermIterator(length of array);
 		//syntax for iterating: while(it.hasNext()) { int[] perm = it.next(); }
 		//permutations can be used as indices for permuting other data types like strings in lexicographical order
-  		private final int[] array;
-  		private final int size;
-  		private boolean hasNext = true;
+		private final int[] array;
+		private final int size;
+		private boolean hasNext = true;
 
-	  	public PermIterator(int size) {
-	    	this.size = size;
-	    	this.array = new int[size];
-	    	for (int i = 0; i < size; i++) {
-	      		array[i] = i;
-	    	}
-	  	}
-	
-	  	@Override
-	  	public boolean hasNext() {
-	    	return hasNext;
-	  	}
-	
-	  	@Override
+		public PermIterator(int size) {
+			this.size = size;
+			this.array = new int[size];
+			for (int i = 0; i < size; i++) {
+				array[i] = i;
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			return hasNext;
+		}
+
+		@Override
 		public int[] next() {
-		  	if (!hasNext) {
-		    	return null;
-		  	}
-		  	int[] result = array.clone();
-		  	// Find the first element from the right that can be incremented (start index of suffix)
-		  	int i;
-		  	for (i = size - 1; i > 0 && array[i - 1] >= array[i]; i--);
-		  	// If no such element exists, we have reached the last permutation
-		  	if (i == 0) {
-		    	hasNext = false;
-		    	return result;
-		  	}
+			if (!hasNext) {
+				return null;
+			}
+			int[] result = array.clone();
+			// Find the first element from the right that can be incremented (start index of suffix)
+			int i;
+			for (i = size - 1; i > 0 && array[i - 1] >= array[i]; i--)
+				;
+			// If no such element exists, we have reached the last permutation
+			if (i == 0) {
+				hasNext = false;
+				return result;
+			}
 			//pivot is index before suffix start
-		  	//set pivot to smallest element in suffix bigger than pivot
+			//set pivot to smallest element in suffix bigger than pivot
 			int minsuffix = Integer.MAX_VALUE;
 			int minInd = 0;
-			for(int j = i; j < size; j++) {
-				if(array[j] < minsuffix && array[j] > array[i-1]) {
+			for (int j = i; j < size; j++) {
+				if (array[j] < minsuffix && array[j] > array[i - 1]) {
 					minsuffix = array[j];
 					minInd = j;
 				}
 			}
-		  	ArrayHelper.swap(array, i-1, minInd);
+			ArrayHelper.swap(array, i - 1, minInd);
 			//reverse suffix
-		  	int start = i;
-			int end = size-1;
-			while(start < end) {
+			int start = i;
+			int end = size - 1;
+			while (start < end) {
 				ArrayHelper.swap(array, start++, end--);
 			}
-		  	return result;
+			return result;
+		}
+	}
+	
+	public static class TreeNode<T> {
+		public T data;
+		public TreeNode<T> left;
+		public TreeNode<T> right;
+
+		public TreeNode(T data) {
+			this.data = data;
+			this.left = null;
+			this.right = null;
+		}
+	}
+
+	public static class LinkedNode<T> {
+		public T data;
+		public LinkedNode<T> next;
+
+		public LinkedNode(T data) {
+			this.data = data;
+			this.next = null;
+		}
+	}
+
+	public static class GraphNode<T> {
+		public T data;
+		public ArrayList<GraphNode<T>> neighbors;
+
+		public GraphNode(T data) {
+			this.data = data;
+			this.neighbors = new ArrayList<GraphNode<T>>();
 		}
 	}
 }
