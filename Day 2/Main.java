@@ -38,7 +38,7 @@ class Main {
 	static int part1(int[][] reports) {
 		int count = 0;
 		for (int i = 0; i < NUM; i++) {
-			if (isSafe(reports[i])) {
+			if (isSafe(reports[i], -2)) {
 				count++;
 			}
 		}
@@ -48,21 +48,9 @@ class Main {
 	static int part2(int[][] reports) {
 		int count = 0;
 		for (int i = 0; i < NUM; i++) {
-			// check if each is safe
-			if(isSafe(reports[i])) {
-				count++;
-				continue;
-			}
+			// check if the report is safe after excluding each element
 			for (int j = 0; j < reports[i].length; j++) {
-				// check if it follows the pattern of increasing or decreasing by 1, 2, or 3 if this element is removed
-				int[] copy = new int[reports[i].length - 1];
-				int index = 0;
-				for (int k = 0; k < reports[i].length; k++) {
-					if (k != j) {
-						copy[index++] = reports[i][k];
-					}
-				}
-				if (isSafe(copy)) {
+				if (isSafe(reports[i], j)) {
 					count++;
 					break;
 				}
@@ -71,7 +59,7 @@ class Main {
 		return count;
 	}
 
-	static boolean isSafe(int[] report) {
+	static boolean isSafe(int[] report, int excluded) {
 		// calculate if increasing or decreasing using majority
 		int vote = 0;
 		for (int i = 1; i < report.length; i++) {
@@ -81,7 +69,15 @@ class Main {
 		boolean inc = vote > 0;
 		// check if each element follows the pattern
 		for (int i = 1; i < report.length; i++) {
+			if (i == excluded || (i == excluded + 1 && i == 1)) {
+				// skip excluded element
+				continue;
+			}
 			int diff = report[i] - report[i - 1];
+			if (i == excluded + 1) {
+				// if this is the element after the excluded element, calculate the difference skipping the excluded element
+				diff = report[i] - report[i - 2];
+			}
 			if (Math.abs(diff) < 1 || Math.abs(diff) > 3) {
 				// difference out of valid range
 				return false;
