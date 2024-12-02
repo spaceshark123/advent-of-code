@@ -4,13 +4,97 @@ import java.lang.*;
 
 class Main {
 
+	public static final int NUM = 1000;
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day2", System.out);
 
-		
+		// input
+		int[][] reports = new int[NUM][];
+		for (int i = 0; i < NUM; i++) {
+			ArrayList<Integer> report = new ArrayList<>();
+			String[] line = io.getLineArr();
+			for (String s : line) {
+				report.add(Integer.parseInt(s));
+			}
+			reports[i] = new int[report.size()];
+			for (int j = 0; j < report.size(); j++) {
+				reports[i][j] = report.get(j);
+			}
+		}
+
+		// part 1
+		int part1 = part1(reports);
+		io.println(part1);
+
+		// part 2
+		int part2 = part2(reports);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int part1(int[][] reports) {
+		int count = 0;
+		for (int i = 0; i < NUM; i++) {
+			if (isSafe(reports[i])) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	static int part2(int[][] reports) {
+		int count = 0;
+		for (int i = 0; i < NUM; i++) {
+			// check if each is safe
+			if(isSafe(reports[i])) {
+				count++;
+				continue;
+			}
+			for (int j = 0; j < reports[i].length; j++) {
+				// check if it follows the pattern of increasing or decreasing by 1, 2, or 3 if this element is removed
+				int[] copy = new int[reports[i].length - 1];
+				int index = 0;
+				for (int k = 0; k < reports[i].length; k++) {
+					if (k != j) {
+						copy[index++] = reports[i][k];
+					}
+				}
+				if (isSafe(copy)) {
+					count++;
+					break;
+				}
+			}
+		}
+		return count;
+	}
+
+	static boolean isSafe(int[] report) {
+		// calculate if increasing or decreasing using majority
+		int vote = 0;
+		for (int i = 1; i < report.length; i++) {
+			int diff = report[i] - report[i - 1];
+			vote += Math.signum(diff);
+		}
+		boolean inc = vote > 0;
+		// check if each element follows the pattern
+		for (int i = 1; i < report.length; i++) {
+			int diff = report[i] - report[i - 1];
+			if (Math.abs(diff) < 1 || Math.abs(diff) > 3) {
+				// difference out of valid range
+				return false;
+			}
+			if (diff < 0 && inc) {
+				//decreasing when it should be increasing
+				return false;
+			} else if (diff > 0 && !inc) {
+				//increasing when it should be decreasing
+				return false;
+			}
+		}
+		return true;
 	}
 
 	static class Kattio extends PrintWriter {
