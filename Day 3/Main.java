@@ -3,16 +3,99 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
-
-	public static final int NUM = 1000;
-
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day3", System.out);
 
-		
+		// input
+		String str = io.getAll().replaceAll("\n", "");
+
+		// part 1
+		int part1 = part1(str);
+		io.println(part1);
+
+		// part 2
+		int part2 = part2(str);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int part1(String str) {
+		return parse(str);
+	}
+
+	static int part2(String str) {
+		return parse(filter(str));
+	}
+
+	static String filter(String str) {
+		// filter out the sections between don't() and do() or between don't() and the end of the string
+		String[] parts = str.split("don't()");
+		String strFiltered = "";
+		if (parts.length == 1) {
+			// if there is no don't() in the string, just use the whole string
+			strFiltered = parts[0];
+		} else {
+			for (int i = 0; i < parts.length; i++) {
+				String part = parts[i];
+				int doIndex = part.indexOf("do()");
+				if (i == 0) {
+					// first part, just add it to the new string
+					strFiltered += part;
+					continue;
+				}
+				if (doIndex == -1 || doIndex == part.length() - 4) {
+					// no do() found or do() is at the end of the string, skip this part
+					continue;
+				}
+				strFiltered += part.substring(part.indexOf("do()") + 4);
+			}
+		}
+		return strFiltered;
+	}
+
+	static int parse(String str) {
+		String temp = "";
+		final String MUL = "mul(";
+		int result = 0, stage = 0, num1 = 0, num2 = 0;
+		char[] strArr = str.toCharArray();
+		for (char c : strArr) {
+			if (stage == 0 && MUL.startsWith(temp + c)) {
+				// check keyword match stage
+				temp += c;
+				if (temp.equals(MUL)) {
+					stage++;
+					temp = "";
+				}
+			} else if (stage == 1) {
+				// first number stage
+				if (c == ',') {
+					stage++;
+				} else if (Character.isDigit(c)) {
+					num1 = num1 * 10 + (c - '0');
+				} else {
+					temp = "";
+					stage = num1 = num2 = 0;
+				}
+			} else if (stage == 2) {
+				// second number stage
+				if (c == ')') {
+					// do the multiplication
+					result += num1 * num2;
+					temp = "";
+					stage = num1 = num2 = 0;
+				} else if (Character.isDigit(c)) {
+					num2 = num2 * 10 + (c - '0');
+				} else {
+					temp = "";
+					stage = num1 = num2 = 0;
+				}
+			} else {
+				temp = "";
+			}
+		}
+		return result;
 	}
 
 	static class Kattio extends PrintWriter {
@@ -44,6 +127,10 @@ class Main {
 		}
 
 		public boolean hasMoreTokens() {
+			return peekToken() != null;
+		}
+
+		public boolean hasNextLine() {
 			return peekToken() != null;
 		}
 
@@ -93,6 +180,15 @@ class Main {
 			} catch (IOException e) {
 				return null;
 			}
+		}
+
+		public String getAll() {
+			StringBuilder sb = new StringBuilder();
+			String line;
+			while ((line = getLine()) != null) {
+				sb.append(line).append("\n");
+			}
+			return sb.toString();
 		}
 		
 		public String[] getLineArr() {
