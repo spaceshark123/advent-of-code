@@ -1,3 +1,3 @@
 # Advent of Code 2024
  
-These are my submissions to the 2024 Advent of Code challenge. They are written in Java, and organized by day.
+These are my submissions to the 2024 Advent of Code challenge. They are written in Java, and organized by day. Also included is my Java source code template for Advent of Code and other competitive programming contests. The solutions are usually hacked together by me during the first few minutes of each day's competition, then I go back and refine my solution to clean up my code and do optimizations.
