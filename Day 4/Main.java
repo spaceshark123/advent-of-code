@@ -3,13 +3,105 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static final String XMAS = "XMAS";
+	static final String SSMM = "SSMM";
+	static final int[] diagonalX = { 1, 1, -1, -1 }; // diagonal directions x
+	static final int[] diagonalY = { 1, -1, -1, 1 }; // diagonal directions y
+	static final int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 }; // all 8 directions x
+	static final int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 }; // all 8 directions y
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
-		Kattio io = new Kattio("day3", System.out);
+		Kattio io = new Kattio("day4", System.out);
 
-		
+		// take input
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[lines.length][lines[0].length()];
+		for (int i = 0; i < lines.length; i++) {
+			grid[i] = lines[i].toCharArray();
+		}
+
+		// part 1
+		int part1 = part1(grid);
+		io.println(part1);
+
+		// part 2
+		int part2 = part2(grid);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int part1(char[][] grid) {
+		// do word search for 'XMAS' and count the number of times it appears
+		int count = 0;
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				if (grid[i][j] == 'X') {
+					count += xmasSearch(grid, i, j);
+				}
+			}
+		}
+		return count;
+	}
+
+	static int part2(char[][] grid) {
+		// count crosses of 'MAS' with itself (A is the center)
+		int count = 0;
+		for (int i = 1; i < grid.length-1; i++) {
+			for (int j = 1; j < grid[0].length-1; j++) {
+				if (grid[i][j] == 'A') {
+					if (xSearch(grid, i, j)) {
+						count++;
+					}
+				}
+			}
+		}
+		return count;
+	}
+
+	static boolean xSearch(char[][] grid, int x, int y) {
+		// in all 4 diagonal directions, check if 'SSMM' can be found in any circular order, meaning two 'MAS's cross each other
+		for (int i = 0; i < 4; i++) {
+			int j = 0;
+			for (j = 0; j < 4; j++) {
+				int nx = clamp(x + diagonalX[(j + i) % 4], 0, grid.length-1);
+				int ny = clamp(y + diagonalY[(j + i) % 4], 0, grid[0].length-1);
+				if (grid[nx][ny] != SSMM.charAt(j % 4)) {
+					break;
+				}
+			}
+			if (j == 4) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	static int xmasSearch(char[][] grid, int x, int y) {
+		// check if word can be found starting from x, y
+		// check all 8 directions and return the number of times the word is found
+		int count = 0;
+		for (int i = 0; i < 8; i++) {
+			int nx = x;
+			int ny = y;
+			int j = 0;
+			for (j = 0; j < 4; j++) {
+				if (grid[nx][ny] != XMAS.charAt(j)) {
+					break;
+				}
+				nx = clamp(nx + dx[i], 0, grid.length-1);
+				ny = clamp(ny + dy[i], 0, grid[0].length-1);
+			}
+			if (j == 4) {
+				count++;
+			}
+		}
+		return count;
+	}
+	
+	static int clamp(int val, int min, int max) {
+		return Math.max(min, Math.min(max, val));
 	}
 
 	static class Kattio extends PrintWriter {
