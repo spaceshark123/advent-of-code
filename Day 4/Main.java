@@ -5,8 +5,6 @@ import java.lang.*;
 class Main {
 	static final String XMAS = "XMAS";
 	static final String SSMM = "SSMM";
-	static final int[] diagonalX = { 1, 1, -1, -1 }; // diagonal directions x
-	static final int[] diagonalY = { 1, -1, -1, 1 }; // diagonal directions y
 	static final int[] dx = { 0, 1, 1, 1, 0, -1, -1, -1 }; // all 8 directions x
 	static final int[] dy = { 1, 1, 0, -1, -1, -1, 0, 1 }; // all 8 directions y
 
@@ -61,26 +59,14 @@ class Main {
 	}
 
 	static boolean xSearch(char[][] grid, int x, int y) {
-		// in all 4 diagonal directions, check if 'SSMM' can be found in any circular order, meaning two 'MAS's cross each other
-		for (int i = 0; i < 4; i++) {
-			int j = 0;
-			for (j = 0; j < 4; j++) {
-				int nx = clamp(x + diagonalX[(j + i) % 4], 0, grid.length-1);
-				int ny = clamp(y + diagonalY[(j + i) % 4], 0, grid[0].length-1);
-				if (grid[nx][ny] != SSMM.charAt(j % 4)) {
-					break;
-				}
-			}
-			if (j == 4) {
-				return true;
-			}
-		}
-		return false;
+		// check if 'MAS' forms a cross with itself by checking diagonals
+		String diag1 = "" + grid[clamp(x - 1, 0, grid.length - 1)][clamp(y - 1, 0, grid[0].length - 1)] + grid[clamp(x + 1, 0, grid.length - 1)][clamp(y + 1, 0, grid[0].length - 1)];
+		String diag2 = "" + grid[clamp(x + 1, 0, grid.length - 1)][clamp(y - 1, 0, grid[0].length - 1)] + grid[clamp(x - 1, 0, grid.length - 1)][clamp(y + 1, 0, grid[0].length - 1)];
+		return diag1.contains("M") && diag1.contains("S") && diag2.contains("M") && diag2.contains("S");
 	}
 
 	static int xmasSearch(char[][] grid, int x, int y) {
-		// check if word can be found starting from x, y
-		// check all 8 directions and return the number of times the word is found
+		// check if word can be found starting from x, y in all 8 directions
 		int count = 0;
 		for (int i = 0; i < 8; i++) {
 			int nx = x;
