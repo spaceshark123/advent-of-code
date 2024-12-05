@@ -37,11 +37,17 @@ class Main {
 		}
 
 		// part 1
+		long start1 = System.currentTimeMillis();
 		int part1 = solve(1, rule1, rule2, updates);
+		long end1 = System.currentTimeMillis();
+		System.out.println("Time taken: " + (end1 - start1) + "ms");
 		io.println(part1);
 
 		// part 2
+		long start = System.currentTimeMillis();
 		int part2 = solve(2, rule1, rule2, updates);
+		long end = System.currentTimeMillis();
+		System.out.println("Time taken: " + (end - start) + "ms");
 		io.println(part2);
 
 		io.close();
@@ -62,7 +68,9 @@ class Main {
 	static boolean valid(int[] update, int[] rule1, int[] rule2, boolean fix) {
 		// for every corresponding pair of rule1 and rule2, rule1 must come before rule2
 		boolean valid = true;
+		// only do the full iteration for 'fix' case, otherwise a single pass is enough
 		for (int n = 0; n < (fix ? rule1.length : 1); n++) {
+			boolean swapped = false;
 			for (int i = 0; i < rule1.length; i++) {
 				int rule1Index = ArrayHelper.indexOf(update, rule1[i]);
 				int rule2Index = ArrayHelper.indexOf(update, rule2[i]);
@@ -73,11 +81,16 @@ class Main {
 					if (fix) {
 						// swap the two numbers to make it valid
 						valid = false;
+						swapped = true;
 						ArrayHelper.swap(update, rule1Index, rule2Index);
 					} else {
 						return false;
 					}
 				}
+			}
+			if (!swapped) {
+				// if no swaps were made, then it is valid
+				break;
 			}
 		}
 		return valid;
