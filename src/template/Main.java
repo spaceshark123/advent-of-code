@@ -5,9 +5,9 @@ import java.lang.*;
 class Main {
 	public static void main(String[] args) throws IOException {
 		// read input from file
-		Kattio io = new Kattio("day3", System.out);
+		Kattio io = new Kattio("__input__", System.out);
 
-		
+
 
 		io.close();
 	}
@@ -45,7 +45,21 @@ class Main {
 		}
 
 		public boolean hasNextLine() {
-			return peekToken() != null;
+			try {
+				// Mark the current position in the stream
+				r.mark(1000); // 1000 is the buffer size for mark/reset
+				
+				// Try to read the next line
+				if (r.readLine() != null) {
+					// If a line is available, reset the reader to the marked position
+					r.reset();
+					return true;
+				} else {
+					return false; // No more lines
+				}
+			} catch (IOException e) {
+				return false; // In case of I/O error, assume no more lines
+			}
 		}
 
 		public int getInt() {

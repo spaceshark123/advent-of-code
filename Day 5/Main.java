@@ -24,8 +24,8 @@ class Main {
 		io.getLine(); // skip empty line
 		// read updates
 		ArrayList<String> updatesList = new ArrayList<>();
-		while ((line = io.getLine()) != null) {
-			updatesList.add(line);
+		while (io.hasNextLine()) {
+			updatesList.add(io.getLine());
 		}
 		int[][] updates = new int[updatesList.size()][];
 		for (int j = 0; j < updatesList.size(); j++) {
@@ -116,7 +116,21 @@ class Main {
 		}
 
 		public boolean hasNextLine() {
-			return peekToken() != null;
+			try {
+				// Mark the current position in the stream
+				r.mark(1000); // 1000 is the buffer size for mark/reset
+				
+				// Try to read the next line
+				if (r.readLine() != null) {
+					// If a line is available, reset the reader to the marked position
+					r.reset();
+					return true;
+				} else {
+					return false; // No more lines
+				}
+			} catch (IOException e) {
+				return false; // In case of I/O error, assume no more lines
+			}
 		}
 
 		public int getInt() {
