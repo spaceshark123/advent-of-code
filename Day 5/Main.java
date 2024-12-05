@@ -5,11 +5,82 @@ import java.lang.*;
 class Main {
 	public static void main(String[] args) throws IOException {
 		// read input from file
-		Kattio io = new Kattio("day3", System.out);
+		Kattio io = new Kattio("day5", System.out);
 
-		
+		// input
+		// read rules
+		ArrayList<String> rules = new ArrayList<>();
+		String line;
+		while (!(line = io.getLine()).equals("")) {
+			rules.add(line);
+		}
+		int[] rule1 = new int[rules.size()]; // rule1 is the first number in each rule
+		int[] rule2 = new int[rules.size()]; // rule2 is the second number in each rule
+		for (int j = 0; j < rules.size(); j++) {
+			String[] rule = rules.get(j).split("\\|");
+			rule1[j] = Integer.parseInt(rule[0]);
+			rule2[j] = Integer.parseInt(rule[1]);
+		}
+		io.getLine(); // skip empty line
+		// read updates
+		ArrayList<String> updatesList = new ArrayList<>();
+		while ((line = io.getLine()) != null) {
+			updatesList.add(line);
+		}
+		int[][] updates = new int[updatesList.size()][];
+		for (int j = 0; j < updatesList.size(); j++) {
+			String[] update = updatesList.get(j).split(",");
+			updates[j] = new int[update.length];
+			for (int k = 0; k < update.length; k++) {
+				updates[j][k] = Integer.parseInt(update[k]);
+			}
+		}
+
+		// part 1
+		int part1 = solve(1, rule1, rule2, updates);
+		io.println(part1);
+
+		// part 2
+		int part2 = solve(2, rule1, rule2, updates);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int solve(int part, int[] rule1, int[] rule2, int[][] updates) {
+		int sum = 0;
+		for (int i = 0; i < updates.length; i++) {
+			if ((part == 1 && valid(updates[i], rule1, rule2, false)) ||
+				(part == 2 && !valid(updates[i], rule1, rule2, true))) {
+				// add the middle number of update to sum
+				sum += updates[i][updates[i].length / 2];
+			}
+		}
+		return sum;
+	}
+
+	static boolean valid(int[] update, int[] rule1, int[] rule2, boolean fix) {
+		// for every corresponding pair of rule1 and rule2, rule1 must come before rule2
+		boolean valid = true;
+		for (int n = 0; n < (fix ? rule1.length : 1); n++) {
+			for (int i = 0; i < rule1.length; i++) {
+				int rule1Index = ArrayHelper.indexOf(update, rule1[i]);
+				int rule2Index = ArrayHelper.indexOf(update, rule2[i]);
+				if (rule1Index == -1 || rule2Index == -1) {
+					continue;
+				}
+				if (rule1Index > rule2Index) {
+					if (fix) {
+						// swap the two numbers to make it valid
+						valid = false;
+						ArrayHelper.swap(update, rule1Index, rule2Index);
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+		return valid;
 	}
 
 	static class Kattio extends PrintWriter {
