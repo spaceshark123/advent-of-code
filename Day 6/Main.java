@@ -3,13 +3,165 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static final int[] dxs = { -1, 0, 1, 0 };
+	static final int[] dys = { 0, 1, 0, -1 };
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day6", System.out);
 
+		// input
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[lines.length][lines[0].length()];
+		for (int i = 0; i < lines.length; i++) {
+			grid[i] = lines[i].toCharArray();
+		}
 
+		// part 1
+		int part1 = part1(grid);
+		io.println(part1);
+
+		// part 2
+		int part2 = part2(grid);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int part1(char[][] grid) {
+		// find the starting point (^)
+		int[] start = findStart(grid);
+		int x = start[0];
+		int y = start[1];
+		// store visited nodes
+		boolean[][] visited = new boolean[grid.length][grid[0].length];
+		int direction = 0; // 0 = up, 1 = right, 2 = down, 3 = left
+		// mark the current node as visited
+		visited[x][y] = true;
+		// simulate the path
+		while (true) {
+			// find the next direction
+			int dx = dxs[direction];
+			int dy = dys[direction];
+			while (0 <= x + dx && x + dx < grid[0].length && 0 <= y + dy && y + dy < grid.length
+					&& grid[x + dx][y + dy] == '#') {
+				direction = (direction + 1) % 4;
+				dx = dxs[direction];
+				dy = dys[direction];
+			}
+			// move in the current direction
+			x += dx;
+			y += dy;
+			if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
+				break;
+			}
+			// mark the current node as visited
+			visited[x][y] = true;
+		}
+		// count the number of visited nodes
+		int count = 0;
+		for (int i = 0; i < visited.length; i++) {
+			for (int j = 0; j < visited[0].length; j++) {
+				if (visited[i][j]) {
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
+	static int part2(char[][] grid) {
+		// find the starting point (^)
+		int[] start = findStart(grid);
+		int x = start[0];
+		int y = start[1];
+		// store visited nodes
+		@SuppressWarnings("unchecked")
+		HashSet<Integer>[][] visited = new HashSet[grid.length][grid[0].length];
+		for (int i = 0; i < visited.length; i++) {
+			for (int j = 0; j < visited[0].length; j++) {
+				visited[i][j] = new HashSet<>();
+			}
+		}
+		HashSet<String> possibleObstructions = new HashSet<>();
+		// simulate the path until we leave the grid
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				if (grid[i][j] != '.') {
+					continue;
+				}
+				progressBar(20, "Part 2", i * grid[0].length + j, grid.length * grid[0].length, "");
+				// store the current node
+				char temp = grid[i][j];
+				int direction = 0; // 0 = up, 1 = right, 2 = down, 3 = left
+				int tempX = x;
+				int tempY = y;
+				grid[i][j] = '#';
+				// array of hashsets to store the direction we came from
+				for (int f = 0; f < visited.length; f++) {
+					for (int g = 0; g < visited[0].length; g++) {
+						visited[f][g].clear();
+					}
+				}
+				// mark the current node as visited
+				visited[x][y].add(direction);
+				// simulate the path
+				while (true) {
+					// find the next direction
+					int dx = dxs[direction];
+					int dy = dys[direction];
+					while (0 <= x + dx && x + dx < grid[0].length && 0 <= y + dy && y + dy < grid.length
+							&& grid[x + dx][y + dy] == '#') {
+						direction = (direction + 1) % 4;
+						dx = dxs[direction];
+						dy = dys[direction];
+					}
+					// move in the current direction
+					x += dx;
+					y += dy;
+					if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
+						break;
+					}
+					// if we reach a node we have visited before, it is an infinite loop
+					if (visited[x][y].contains(direction)) {
+						possibleObstructions.add(i + " " + j);
+						break;
+					}
+					// mark the current node as visited
+					visited[x][y].add(direction);
+				}
+				// reset the grid
+				grid[i][j] = temp;
+				x = tempX;
+				y = tempY;
+			}
+		}
+		System.out.println();
+		return possibleObstructions.size();
+	}
+	
+	static int[] findStart(char[][] grid) {
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				if (grid[i][j] == '^') {
+					return new int[] { i, j };
+				}
+			}
+		}
+		return new int[] { -1, -1 };
+	}
+
+	static void progressBar(int width, String title, int current, int total, String subtitle) {
+		String filled = "█";
+		String unfilled = "░";
+		double fill = (double) current / total;
+		if (fill >= 0 && fill <= 1) {
+			//set progress bar
+			int fillAmount = (int) Math.ceil(fill * width);
+			StringBuilder bar = new StringBuilder();
+			bar.append(title).append(": ").append(filled.repeat(fillAmount)).append(unfilled.repeat(width - fillAmount)).append(" ").append(current).append("/").append(total).append(" ").append(subtitle).append("      ").append("\r");
+			System.out.print(bar.toString());
+		}
 	}
 
 	static class Kattio extends PrintWriter {
