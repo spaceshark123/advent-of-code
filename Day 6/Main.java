@@ -18,17 +18,17 @@ class Main {
 		}
 
 		// part 1
-		int part1 = part1(grid);
-		io.println(part1);
+		List<int[]> part1 = part1(grid);
+		io.println(part1.size());
 
 		// part 2
-		int part2 = part2(grid);
+		int part2 = part2(grid, part1);
 		io.println(part2);
 
 		io.close();
 	}
 
-	static int part1(char[][] grid) {
+	static List<int[]> part1(char[][] grid) {
 		// find the starting point (^)
 		int[] start = findStart(grid);
 		int x = start[0];
@@ -59,22 +59,20 @@ class Main {
 			visited[x][y] = true;
 		}
 		// count the number of visited nodes
-		int count = 0;
+		List<int[]> count = new ArrayList<>();
 		for (int i = 0; i < visited.length; i++) {
 			for (int j = 0; j < visited[0].length; j++) {
 				if (visited[i][j]) {
-					count++;
+					count.add(new int[] { i, j });
 				}
 			}
 		}
 		return count;
 	}
 
-	static int part2(char[][] grid) {
+	static int part2(char[][] grid, List<int[]> part1) {
 		// find the starting point (^)
 		int[] start = findStart(grid);
-		int x = start[0];
-		int y = start[1];
 		// store visited nodes
 		int[][] visited = new int[grid.length][grid[0].length];
 		for (int i = 0; i < visited.length; i++) {
@@ -83,57 +81,55 @@ class Main {
 			}
 		}
 		int count = 0;
-		// simulate the path until we leave the grid
-		for (int i = 0; i < grid.length; i++) {
-			for (int j = 0; j < grid[0].length; j++) {
-				progressBar(20, "Part 2", i * grid[0].length + j, grid.length * grid[0].length, "");
-				if (grid[i][j] != '.') {
-					continue;
+		// test possible obstruction points along the path
+		for (int n = 0; n < part1.size(); n++) {
+			int i = part1.get(n)[0];
+			int j = part1.get(n)[1];
+			progressBar(20, "Part 2", n, part1.size(), "");
+			if (grid[i][j] != '.') {
+				continue;
+			}
+			// store the current node
+			char temp = grid[i][j];
+			int direction = 0; // 0 = up, 1 = right, 2 = down, 3 = left
+			int x = start[0];
+			int y = start[1];
+			grid[i][j] = '#';
+			// array of hashsets to store the direction we came from
+			for (int f = 0; f < visited.length; f++) {
+				for (int g = 0; g < visited[0].length; g++) {
+					visited[f][g] = -1;
 				}
-				// store the current node
-				char temp = grid[i][j];
-				int direction = 0; // 0 = up, 1 = right, 2 = down, 3 = left
-				int tempX = x;
-				int tempY = y;
-				grid[i][j] = '#';
-				// array of hashsets to store the direction we came from
-				for (int f = 0; f < visited.length; f++) {
-					for (int g = 0; g < visited[0].length; g++) {
-						visited[f][g] = -1;
-					}
+			}
+			// mark the current node as visited
+			visited[x][y] = direction;
+			// simulate the path
+			while (true) {
+				// find the next direction
+				int dx = dxs[direction];
+				int dy = dys[direction];
+				while (0 <= x + dx && x + dx < grid[0].length && 0 <= y + dy && y + dy < grid.length
+						&& grid[x + dx][y + dy] == '#') {
+					direction = (direction + 1) % 4;
+					dx = dxs[direction];
+					dy = dys[direction];
+				}
+				// move in the current direction
+				x += dx;
+				y += dy;
+				if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
+					break;
+				}
+				// if we reach a node we have visited before, it is an infinite loop
+				if (visited[x][y] == direction) {
+					count++;
+					break;
 				}
 				// mark the current node as visited
 				visited[x][y] = direction;
-				// simulate the path
-				while (true) {
-					// find the next direction
-					int dx = dxs[direction];
-					int dy = dys[direction];
-					while (0 <= x + dx && x + dx < grid[0].length && 0 <= y + dy && y + dy < grid.length
-							&& grid[x + dx][y + dy] == '#') {
-						direction = (direction + 1) % 4;
-						dx = dxs[direction];
-						dy = dys[direction];
-					}
-					// move in the current direction
-					x += dx;
-					y += dy;
-					if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
-						break;
-					}
-					// if we reach a node we have visited before, it is an infinite loop
-					if (visited[x][y] == direction) {
-						count++;
-						break;
-					}
-					// mark the current node as visited
-					visited[x][y] = direction;
-				}
-				// reset the grid
-				grid[i][j] = temp;
-				x = tempX;
-				y = tempY;
 			}
+			// reset the grid
+			grid[i][j] = temp;
 		}
 		System.out.println();
 		return count;
