@@ -76,21 +76,20 @@ class Main {
 		int x = start[0];
 		int y = start[1];
 		// store visited nodes
-		@SuppressWarnings("unchecked")
-		HashSet<Integer>[][] visited = new HashSet[grid.length][grid[0].length];
+		int[][] visited = new int[grid.length][grid[0].length];
 		for (int i = 0; i < visited.length; i++) {
 			for (int j = 0; j < visited[0].length; j++) {
-				visited[i][j] = new HashSet<>();
+				visited[i][j] = -1;
 			}
 		}
-		HashSet<String> possibleObstructions = new HashSet<>();
+		int count = 0;
 		// simulate the path until we leave the grid
 		for (int i = 0; i < grid.length; i++) {
 			for (int j = 0; j < grid[0].length; j++) {
+				progressBar(20, "Part 2", i * grid[0].length + j, grid.length * grid[0].length, "");
 				if (grid[i][j] != '.') {
 					continue;
 				}
-				progressBar(20, "Part 2", i * grid[0].length + j, grid.length * grid[0].length, "");
 				// store the current node
 				char temp = grid[i][j];
 				int direction = 0; // 0 = up, 1 = right, 2 = down, 3 = left
@@ -100,11 +99,11 @@ class Main {
 				// array of hashsets to store the direction we came from
 				for (int f = 0; f < visited.length; f++) {
 					for (int g = 0; g < visited[0].length; g++) {
-						visited[f][g].clear();
+						visited[f][g] = -1;
 					}
 				}
 				// mark the current node as visited
-				visited[x][y].add(direction);
+				visited[x][y] = direction;
 				// simulate the path
 				while (true) {
 					// find the next direction
@@ -123,12 +122,12 @@ class Main {
 						break;
 					}
 					// if we reach a node we have visited before, it is an infinite loop
-					if (visited[x][y].contains(direction)) {
-						possibleObstructions.add(i + " " + j);
+					if (visited[x][y] == direction) {
+						count++;
 						break;
 					}
 					// mark the current node as visited
-					visited[x][y].add(direction);
+					visited[x][y] = direction;
 				}
 				// reset the grid
 				grid[i][j] = temp;
@@ -137,7 +136,7 @@ class Main {
 			}
 		}
 		System.out.println();
-		return possibleObstructions.size();
+		return count;
 	}
 	
 	static int[] findStart(char[][] grid) {
