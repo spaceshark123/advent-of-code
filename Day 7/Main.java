@@ -7,9 +7,80 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day7", System.out);
 
-		
+		// input
+		String[] lines = io.getAll().split("\n");
+		long[] total = new long[lines.length];
+		long[][] arr = new long[lines.length][];
+		for (int i = 0; i < lines.length; i++) {
+			String[] split = lines[i].split(" ");
+			total[i] = Long.parseLong(split[0].substring(0, split[0].length() - 1));
+			arr[i] = new long[split.length - 1];
+			for (int j = 1; j < split.length; j++) {
+				arr[i][j - 1] = Long.parseLong(split[j]);
+			}
+		}
+
+		// part 1
+		long part1 = part1(total, arr);
+		io.println(part1);
+
+		// part 2
+		long part2 = part2(total, arr);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static long part1(long[] total, long[][] arr) {
+		long sum = 0;
+		for (int i = 0; i < total.length; i++) {
+			// check if any combination of * and + in arr[i] equals total[i]
+			int n = arr[i].length;
+			int combinations = 1 << (n - 1);
+			for (int j = 0; j < combinations; j++) {
+				long current = arr[i][0];
+				for (int k = 0; k < n - 1; k++) {
+					int op = (j >> k) & 1;
+					if (op == 0) {
+						current *= arr[i][k + 1];
+					} else {
+						current += arr[i][k + 1];
+					}
+				}
+				if (current == total[i]) {
+					sum += total[i];
+					break;
+				}
+			}
+		}
+		return sum;
+	}
+	
+	static long part2(long[] total, long[][] arr) {
+		long sum = 0;
+		for (int i = 0; i < total.length; i++) {
+			// check if any combination of * and + and || (concat digits) in arr[i] equals total[i]
+			int n = arr[i].length;
+			int combinations = (int) Math.pow(3, n - 1);
+			for (int j = 0; j < combinations; j++) {
+				long current = arr[i][0];
+				for (int k = 0; k < n - 1; k++) {
+					int op = (j / (int) Math.pow(3, k)) % 3;
+					if (op == 0) {
+						current *= arr[i][k + 1];
+					} else if (op == 1) {
+						current += arr[i][k + 1];
+					} else {
+						current = Long.parseLong(current + "" + arr[i][k + 1]);
+					}
+				}
+				if (current == total[i]) {
+					sum += total[i];
+					break;
+				}
+			}
+		}
+		return sum;
 	}
 
 	static class Kattio extends PrintWriter {
