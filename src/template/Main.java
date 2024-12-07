@@ -346,4 +346,43 @@ class Main {
 			this.neighbors = new ArrayList<GraphNode<T>>();
 		}
 	}
+
+	public static class BaseIterator {
+		private int max;
+		private int count = 0;
+		private int base;
+		private int size;
+
+		public BaseIterator(int base, int size) {
+			if (base < 2) {
+				throw new IllegalArgumentException("Base must be at least 2");
+			}
+			this.base = base;
+			this.size = size;
+			max = (int) Math.pow(base, size);
+		}
+
+		public boolean hasNext() {
+			return count < max;
+		}
+
+		public int[] next() {
+			if (!hasNext()) {
+				return null;
+			}
+			// Convert the current count to a base representation
+			int[] result = new int[size];
+			int temp = count;
+			for (int i = 0; i < size; i++) {
+				result[i] = temp % base;
+				temp /= base;
+			}
+			count++;
+			return result;
+		}
+
+		public void reset() {
+			count = 0;
+		}
+	}
 }

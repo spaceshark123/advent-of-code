@@ -60,15 +60,14 @@ class Main {
 		long sum = 0;
 		for (int i = 0; i < total.length; i++) {
 			// check if any combination of * and + and || (concat digits) in arr[i] equals total[i]
-			int n = arr[i].length;
-			int combinations = (int) Math.pow(3, n - 1);
-			for (int j = 0; j < combinations; j++) {
+			BaseIterator it = new BaseIterator(3, arr[i].length - 1);
+			while (it.hasNext()) {
 				long current = arr[i][0];
-				for (int k = 0; k < n - 1; k++) {
-					int op = (j / (int) Math.pow(3, k)) % 3;
-					if (op == 0) {
+				int[] perm = it.next();
+				for (int k = 0; k < perm.length; k++) {
+					if (perm[k] == 0) {
 						current *= arr[i][k + 1];
-					} else if (op == 1) {
+					} else if (perm[k] == 1) {
 						current += arr[i][k + 1];
 					} else {
 						current = Long.parseLong(current + "" + arr[i][k + 1]);
@@ -415,6 +414,45 @@ class Main {
 		public GraphNode(T data) {
 			this.data = data;
 			this.neighbors = new ArrayList<GraphNode<T>>();
+		}
+	}
+
+	public static class BaseIterator {
+		private int max;
+		private int count = 0;
+		private int base;
+		private int size;
+
+		public BaseIterator(int base, int size) {
+			if (base < 2) {
+				throw new IllegalArgumentException("Base must be at least 2");
+			}
+			this.base = base;
+			this.size = size;
+			max = (int) Math.pow(base, size);
+		}
+
+		public boolean hasNext() {
+			return count < max;
+		}
+
+		public int[] next() {
+			if (!hasNext()) {
+				return null;
+			}
+			// Convert the current count to a base representation
+			int[] result = new int[size];
+			int temp = count;
+			for (int i = 0; i < size; i++) {
+				result[i] = temp % base;
+				temp /= base;
+			}
+			count++;
+			return result;
+		}
+
+		public void reset() {
+			count = 0;
 		}
 	}
 }
