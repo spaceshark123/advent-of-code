@@ -65,7 +65,7 @@ Problem was really easy? Especially when compared to yesterday, I was expecting 
 
 ### Day 08
 
-Another easy problem, just a simple loop over all pairs of antennae with the same frequency and constructing all multiples of the difference between them. This marked my first ever sub-500 rank! I'm very happy with today's results.
+Another easy problem, just a simple loop over all pairs of antennae with the same frequency and constructing all multiples of the difference between them. This marked my first ever sub-500 rank! I spent a while trying to optimize the solution to calculate the bounds, or at least prune them, and I did, improving the runtime. I'm very happy with today's results.
 
 **Part 1**: Time `00:09:47`, Rank `673`      
 **Part 2**: Time `00:13:12`, Rank `464`

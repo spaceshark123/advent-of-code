@@ -84,15 +84,16 @@ class Main {
 					int diffY = (antennas.get(c).get(j)[1] - antennas.get(c).get(i)[1]);
 
 					// find all antinodes in the line between the two antennas
-					for (int g = -50; g < 50; g++) {
-						int antinodeX = antennas.get(c).get(i)[0] + diffX * g;
-						int antinodeY = antennas.get(c).get(i)[1] + diffY * g;
+					for (int g = 0; g < 100; g++) {
+						int index = g <= 50 ? g : 50 - g;
+						int antinodeX = antennas.get(c).get(i)[0] + diffX * index;
+						int antinodeY = antennas.get(c).get(i)[1] + diffY * index;
 						if (antinodeX >= 0 && antinodeX < grid.length && antinodeY >= 0 && antinodeY < grid[0].length) {
 							// add antinode if it is in the grid
 							antinodes.add(antinodeX + " " + antinodeY);
-						} else if (g > 0) {
-							// if antinode is out of bounds and g > 0, no need to check further, break
-							break;
+						} else {
+							// if antinode is out of bounds on one side, go to the other side of the line and continue the search
+							g = g < 50 ? 50 : 100;
 						}
 					}
 				}
