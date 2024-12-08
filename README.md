@@ -10,6 +10,7 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 05](#day-05) | [Website](https://adventofcode.com/2024/day/5)
 - [Day 06](#day-06) | [Website](https://adventofcode.com/2024/day/6)
 - [Day 07](#day-07) | [Website](https://adventofcode.com/2024/day/7)
+- [Day 08](#day-08) | [Website](https://adventofcode.com/2024/day/8)
 
 # Summary by Day
 
@@ -61,3 +62,10 @@ Problem was really easy? Especially when compared to yesterday, I was expecting 
 
 **Part 1**: Time `00:06:40`, Rank `738`      
 **Part 2**: Time `00:08:16`, Rank `505`
+
+### Day 08
+
+Another easy problem, just a simple loop over all pairs of antennae with the same frequency and constructing all multiples of the difference between them. This marked my first ever sub-500 rank! I'm very happy with today's results.
+
+**Part 1**: Time `00:09:47`, Rank `673`      
+**Part 2**: Time `00:13:12`, Rank `464`

@@ -5,11 +5,101 @@ import java.lang.*;
 class Main {
 	public static void main(String[] args) throws IOException {
 		// read input from file
-		Kattio io = new Kattio("__input__", System.out);
+		Kattio io = new Kattio("day8", System.out);
 
-		
+		// input
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[lines.length][lines[0].length()];
+		for (int i = 0; i < lines.length; i++) {
+			grid[i] = lines[i].toCharArray();
+		}
+
+		// preprocess
+		HashMap<Character, List<int[]>> antennas = preprocess(grid);
+
+		// part 1
+		int part1 = part1(grid, antennas);
+		io.println(part1);
+
+		// part 2
+		int part2 = part2(grid, antennas);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static HashMap<Character, List<int[]>> preprocess(char[][] grid) {
+		// find all antenna and store their coordinates (key = character, value = list of coordinates)
+		HashMap<Character, List<int[]>> antennas = new HashMap<>();
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				if (grid[i][j] != '.') {
+					int[] coord = { i, j };
+					if (antennas.containsKey(grid[i][j])) {
+						antennas.get(grid[i][j]).add(coord);
+					} else {
+						antennas.put(grid[i][j], new ArrayList<>());
+						antennas.get(grid[i][j]).add(coord);
+					}
+				}
+			}
+		}
+		return antennas;
+	}
+	
+	static int part1(char[][] grid, HashMap<Character, List<int[]>> antennas) {
+		// find all antinodes for every pair of antennas with the same key (char)
+		HashSet<String> antinodes = new HashSet<>();
+		for (char c : antennas.keySet()) {
+			for (int i = 0; i < antennas.get(c).size(); i++) {
+				for (int j = i + 1; j < antennas.get(c).size(); j++) {
+					int diffX = (antennas.get(c).get(i)[0] - antennas.get(c).get(j)[0]);
+					int diffY = (antennas.get(c).get(i)[1] - antennas.get(c).get(j)[1]);
+					int antinode1X = antennas.get(c).get(i)[0] + diffX;
+					int antinode1Y = antennas.get(c).get(i)[1] + diffY;
+					int antinode2X = antennas.get(c).get(j)[0] - diffX;
+					int antinode2Y = antennas.get(c).get(j)[1] - diffY;
+					if (antinode1X >= 0 && antinode1X < grid.length && antinode1Y >= 0 && antinode1Y < grid[0].length) {
+						// add antinode if it is in the grid
+						antinodes.add(antinode1X + " " + antinode1Y);
+					}
+					if (antinode2X >= 0 && antinode2X < grid.length && antinode2Y >= 0 && antinode2Y < grid[0].length) {
+						// add antinode if it is in the grid
+						antinodes.add(antinode2X + " " + antinode2Y);
+					}
+				}
+			}
+		}
+		// count the number of antinodes (unique coordinates)
+		return antinodes.size();
+	}
+
+	static int part2(char[][] grid, HashMap<Character, List<int[]>> antennas) {
+		// find all antinodes for every pair of antennas with the same key (char)
+		HashSet<String> antinodes = new HashSet<>();
+		for (char c : antennas.keySet()) {
+			for (int i = 0; i < antennas.get(c).size(); i++) {
+				for (int j = i + 1; j < antennas.get(c).size(); j++) {
+					int diffX = (antennas.get(c).get(j)[0] - antennas.get(c).get(i)[0]);
+					int diffY = (antennas.get(c).get(j)[1] - antennas.get(c).get(i)[1]);
+
+					// find all antinodes in the line between the two antennas
+					for (int g = -50; g < 50; g++) {
+						int antinodeX = antennas.get(c).get(i)[0] + diffX * g;
+						int antinodeY = antennas.get(c).get(i)[1] + diffY * g;
+						if (antinodeX >= 0 && antinodeX < grid.length && antinodeY >= 0 && antinodeY < grid[0].length) {
+							// add antinode if it is in the grid
+							antinodes.add(antinodeX + " " + antinodeY);
+						} else if (g > 0) {
+							// if antinode is out of bounds and g > 0, no need to check further, break
+							break;
+						}
+					}
+				}
+			}
+		}
+		// count the number of antinodes (unique coordinates)
+		return antinodes.size();
 	}
 
 	static class Kattio extends PrintWriter {
