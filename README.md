@@ -11,6 +11,7 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 06](#day-06) | [Website](https://adventofcode.com/2024/day/6)
 - [Day 07](#day-07) | [Website](https://adventofcode.com/2024/day/7)
 - [Day 08](#day-08) | [Website](https://adventofcode.com/2024/day/8)
+- [Day 09](#day-09) | [Website](https://adventofcode.com/2024/day/9)
 
 # Summary by Day
 
@@ -69,3 +70,10 @@ Another easy problem, just a simple loop over all pairs of antennae with the sam
 
 **Part 1**: Time `00:09:47`, Rank `673`      
 **Part 2**: Time `00:13:12`, Rank `464`
+
+### Day 09
+
+Pretty cool problem although it took a while to understand what it wanted. Finished part 1 pretty quick, but could have done better (I messed up by using int instead of long, causing overflow). This is the second time I've done this, so I should have known better. Part 2 was pretty simple as well, but took longer to code. Surprisingly, a time over 30 minutes still put me at sub-1000! I guess this means the LLM cheaters are starting to struggle with the problems, or the questions are just getting harder. I could have gotten another sub-500 rank, if not for the int-long issue, but decent performance.
+
+**Part 1**: Time `00:10:49`, Rank `503`      
+**Part 2**: Time `00:33:19`, Rank `813`

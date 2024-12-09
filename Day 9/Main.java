@@ -7,10 +7,113 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day9", System.out);
 
+		// input
+		String input = io.getLine();
+		int[] RLE = new int[input.length()]; // input is run-length encoded
+		int sum = 0;
+		for (int i = 0; i < input.length(); i++) {
+			sum += (RLE[i] = input.charAt(i) - '0');
+		}
+		// construct actual arr
+		int[] arr = new int[sum];
+		int index = 0;
+		int id = 0;
+		for (int i = 0; i < RLE.length; i++) {
+			if (i % 2 != 0) {
+				// blank spaces
+				for (int j = 0; j < RLE[i]; j++) {
+					arr[index] = -1;
+					index++;
+				}
+			} else {
+				// actual numbers
+				for (int j = 0; j < RLE[i]; j++) {
+					arr[index] = id;
+					index++;
+				}
+				id++;
+			}
+		}
+		int[] copy = arr.clone();
 
+		// part 1
+		long part1 = part1(arr);
+		io.println(part1);
+
+		// part 2
+		long part2 = part2(copy);
+		io.println(part2);
 
 		io.close();
 	}
+	
+	static long part1(int[] arr) {
+		// move elements from the right to fill empty spaces until no more empty spaces
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == -1) {
+				for (int j = arr.length - 1; j >= i + 1; j--) {
+					if (arr[j] != -1) {
+						arr[i] = arr[j];
+						arr[j] = -1;
+						break;
+					}
+				}
+			}
+		}
+		// calculate checksum
+		long sum = 0;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == -1) {
+				break;
+			}
+			sum += (long) (i * arr[i]);
+		}
+		return sum;
+	}
+
+	static long part2(int[] arr) {
+		// move contiguous (same character) elements from the right to fill empty spaces if it can fit
+		for (int i = arr.length - 1; i >= 0; i--) {
+			if (arr[i] == -1) {
+				continue;
+			}
+			// find length of contiguous elements
+			int len = 1;
+			for (int j = i - 1; j >= 0; j--) {
+				if (arr[j] == arr[i]) {
+					len++;
+				} else {
+					break;
+				}
+			}
+			// find empty spaces of length len
+			int empty = 0;
+			for (int j = 0; j < i; j++) {
+				if (arr[j] == -1) {
+					if (++empty == len) {
+						// move contiguous elements to empty spaces
+						for (int k = 0; k < len; k++) {
+							arr[j - k] = arr[i - k];
+							arr[i - k] = -1;
+						}
+						break;
+					}
+				} else {
+					empty = 0;
+				}
+			}
+			i -= len - 1;
+		}
+		// calculate checksum
+		long sum = 0;
+		for (int i = 0; i < arr.length; i++) {
+			if (arr[i] == -1) {
+				continue;
+			}
+			sum += (long) (i * arr[i]);
+		}
+		return sum;
+	} 
 
 	static class Kattio extends PrintWriter {
 		public Kattio(InputStream i) {
