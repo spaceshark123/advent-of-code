@@ -7,9 +7,83 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day10", System.out);
 
-		
+		String[] lines = io.getAll().split("\n");
+		int[][] grid = new int[lines.length][lines[0].length()];
+		for (int i = 0; i < lines.length; i++) {
+			for (int j = 0; j < lines[i].length(); j++) {
+				grid[i][j] = lines[i].charAt(j) - '0';
+			}
+		}
+
+		// precompute all trails for each trailhead
+		ArrayList<ArrayList<String>> trails = precompute(grid);
+
+		// part 1 (sum up unique visited nines)
+		int part1 = part1(trails);
+		io.println(part1);
+
+		// part 2 (sum up all trails)
+		int part2 = part2(trails);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int part1(ArrayList<ArrayList<String>> part2) {
+		int sum = 0;
+		for (ArrayList<String> visitedNines : part2) {
+			// convert to hashset and add size
+			HashSet<String> set = new HashSet<>(visitedNines);
+			sum += set.size();
+		}
+		return sum;
+	}
+
+	static int part2(ArrayList<ArrayList<String>> part2) {
+		int sum = 0;
+		for (ArrayList<String> visitedNines : part2) {
+			sum += visitedNines.size();
+		}
+		return sum;
+	}
+	
+	static ArrayList<ArrayList<String>> precompute(int[][] grid) {
+		ArrayList<ArrayList<String>> allVisitedNines = new ArrayList<>();
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				if (grid[i][j] != 0) {
+					continue;
+				}
+				// if it is 0, it is a possible trailhead
+				// do bfs to find all 9s that can be reached by going up, down, left, right to increment by 1
+				Queue<int[]> q = new LinkedList<>();
+				ArrayList<String> visitedNines = new ArrayList<>();
+				q.add(new int[] { i, j });
+				while (!q.isEmpty()) {
+					int[] curr = q.poll();
+					int x = curr[0];
+					int y = curr[1];
+					if (grid[x][y] == 9) {
+						visitedNines.add(x + " " + y);
+						continue;
+					}
+					if (x - 1 >= 0 && grid[x - 1][y] == grid[x][y] + 1) {
+						q.add(new int[] { x - 1, y });
+					}
+					if (x + 1 < grid.length && grid[x + 1][y] == grid[x][y] + 1) {
+						q.add(new int[] { x + 1, y });
+					}
+					if (y - 1 >= 0 && grid[x][y - 1] == grid[x][y] + 1) {
+						q.add(new int[] { x, y - 1 });
+					}
+					if (y + 1 < grid[x].length && grid[x][y + 1] == grid[x][y] + 1) {
+						q.add(new int[] { x, y + 1 });
+					}
+				}
+				allVisitedNines.add(visitedNines);
+			}
+		}
+		return allVisitedNines;
 	}
 
 	static class Kattio extends PrintWriter {

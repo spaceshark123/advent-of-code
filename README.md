@@ -12,6 +12,7 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 07](#day-07) | [Website](https://adventofcode.com/2024/day/7)
 - [Day 08](#day-08) | [Website](https://adventofcode.com/2024/day/8)
 - [Day 09](#day-09) | [Website](https://adventofcode.com/2024/day/9)
+- [Day 10](#day-10) | [Website](https://adventofcode.com/2024/day/10)
 
 # Summary by Day
 
@@ -77,3 +78,10 @@ Pretty cool problem although it took a while to understand what it wanted. Finis
 
 **Part 1**: Time `00:10:49`, Rank `503`      
 **Part 2**: Time `00:33:19`, Rank `813`
+
+### Day 10
+
+Interesting problem, used some simple BFS (breadth first search) to solve part 1 using a hashset to filter out duplicates, then realized part 2 just involved allowing duplicates, so changing the datatype from hashset to arraylist was all that was needed. I am annoyed that I messed up my input reading again and didn't realize, which wasted a lot of extra time when I was trying to find the problem in my algorithm. Maybe I should start checking if I read the input correctly before solving the problem. Pretty bad rank.
+
+**Part 1**: Time `00:19:33`, Rank `2934`      
+**Part 2**: Time `00:20:52`, Rank `2255`
