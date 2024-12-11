@@ -13,6 +13,7 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 08](#day-08) | [Website](https://adventofcode.com/2024/day/8)
 - [Day 09](#day-09) | [Website](https://adventofcode.com/2024/day/9)
 - [Day 10](#day-10) | [Website](https://adventofcode.com/2024/day/10)
+- [Day 11](#day-11) | [Website](https://adventofcode.com/2024/day/11)
 
 # Summary by Day
 
@@ -85,3 +86,10 @@ Interesting problem, used some simple BFS (breadth first search) to solve part 1
 
 **Part 1**: Time `00:19:33`, Rank `2934`      
 **Part 2**: Time `00:20:52`, Rank `2255`
+
+### Day 11
+
+At first, it seemed like a simple simulation problem with a slightly convoluted description, with a few bugs along the way involving the overflow of ints (I know, I know, I should be defaulting to longs by now). But the real trouble started with part 2, which looked deceptively simple: increase the blink count from 25 to 75. But due to the exponential growth of the values, things quickly got out of hand for my solution, causing many frustrations as I battled crawling runtimes and heap/memory overflow errors. I finally looked on the reddit for a hint, which was to use dynamic programming. This ended up drastically simplifying the problem, especially after the memoization was implemented. What I failed to realize was that there was many duplicate stones being solved over and over again, so memoization was effective. Many people also used counters to keep track of the lists instead of storing the actual list to reduce redundancy, which was smart. I think today marked the starting point where the problems start needing actual optimization and critical thinking to solve, as opposed to brute force. Insightful day.
+
+**Part 1**: Time `00:14:56`, Rank `4060`      
+**Part 2**: Time `01:17:24`, Rank `5814`

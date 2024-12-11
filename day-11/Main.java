@@ -3,13 +3,71 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static HashMap<Long, Long>[] dp;
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day11", System.out);
 
+		// input
+		String[] input = io.getLine().split(" ");
+		ArrayList<Long> nums = new ArrayList<>(input.length);
+		for (String s : input) {
+			nums.add(Long.parseLong(s));
+		}
 
+		// part 1
+		long start = System.currentTimeMillis();
+		long part1 = solve(nums, 25);
+		long end = System.currentTimeMillis();
+		System.out.println("Time: " + (end - start) + "ms");
+		io.println(part1);
+
+		// part 2
+		start = System.currentTimeMillis();
+		long part2 = solve(nums, 75);
+		end = System.currentTimeMillis();
+		System.out.println("Time: " + (end - start) + "ms");
+		io.println(part2);
 
 		io.close();
+	}
+	
+	@SuppressWarnings("unchecked")
+	static long solve(ArrayList<Long> nums, int depth) {
+		// initialize dp array
+		if(dp == null) {
+			dp = new HashMap[100];
+			for (int i = 0; i < 100; i++) {
+				dp[i] = new HashMap<>();
+			}
+		}
+		long count = 0;
+		for (int j = 0; j < nums.size(); j++) {
+			count += count(nums.get(j), depth);
+		}
+		return count;
+	}
+
+	// recursion + memoization (dynamic programming)
+	static long count(long stone, int depth) {
+		if(depth == 0)
+			return 1;
+		if(dp[depth].getOrDefault(stone, null) != null)
+			return dp[depth].get(stone);
+		if (stone == 0) {
+			dp[depth].put(stone, count(1, depth-1));
+			return dp[depth].get(stone);
+		} else if ((((int) Math.log10(stone)) + 1) % 2 == 0) {
+			String s = Long.toString(stone);
+			long left = Long.parseLong(s.substring(0, s.length() / 2));
+			long right = Long.parseLong(s.substring(s.length() / 2));
+			dp[depth].put(stone, count(left, depth-1) + count(right, depth-1));
+			return dp[depth].get(stone);
+		} else {
+			dp[depth].put(stone, count(stone * 2024, depth-1));
+			return dp[depth].get(stone);
+		}
 	}
 
 	static class Kattio extends PrintWriter {
