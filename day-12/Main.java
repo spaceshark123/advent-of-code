@@ -7,9 +7,176 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day12", System.out);
 
+		// input
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[lines.length][lines[0].length()];
+		for(int i = 0; i < lines.length; i++) {
+			grid[i] = lines[i].toCharArray();
+		}
 
+		// part 1
+		int part1 = part1(grid);
+		io.println(part1);
+
+		// part 2
+		int part2 = part2(grid);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static int part1(char[][] grid) {
+		int cost = 0;
+		boolean[][] visited = new boolean[grid.length][grid[0].length];
+		for (int i = 0; i < grid.length; i++) {
+			for(int j = 0; j < grid[0].length; j++) {
+				if (visited[i][j]) {
+					continue;
+				}
+				// find connected group of cells (same char) using flood fill
+				int area = 0; // number of cells in the group
+				int perimeter = 0; // number of sides that dont border a cell of the same char
+				Queue<int[]> q = new LinkedList<>();
+				q.add(new int[] { i, j });
+				while (!q.isEmpty()) {
+					int[] cell = q.poll();
+					int r = cell[0];
+					int c = cell[1];
+					if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length
+							|| (visited[r][c] && grid[r][c] != grid[i][j]) || grid[r][c] != grid[i][j]) {
+						perimeter++;
+						continue;
+					}
+					if(visited[r][c]) {
+						continue;
+					}
+					visited[r][c] = true;
+					area++;
+					q.add(new int[] { r + 1, c });
+					q.add(new int[] { r - 1, c });
+					q.add(new int[] { r, c + 1 });
+					q.add(new int[] { r, c - 1 });
+				}
+				cost += area * perimeter;
+			}
+		}
+		return cost;
+	}
+
+	@SuppressWarnings("unchecked")
+	static int part2(char[][] grid) {
+		// pad the grid with a border of '.' to avoid out of bounds errors
+		char[][] newGrid = new char[grid.length + 2][grid[0].length + 2];
+		for (int i = 0; i < newGrid.length; i++) {
+			for (int j = 0; j < newGrid[0].length; j++) {
+				if (i == 0 || i == newGrid.length - 1 || j == 0 || j == newGrid[0].length - 1) {
+					newGrid[i][j] = '.';
+				} else {
+					newGrid[i][j] = grid[i - 1][j - 1];
+				}
+			}
+		}
+		int cost = 0;
+		boolean[][] filled = new boolean[newGrid.length][newGrid[0].length];
+		for(int i = 1; i < newGrid.length - 1; i++) {
+			for (int j = 1; j < newGrid[0].length - 1; j++) {
+				if (filled[i][j]) {
+					continue;
+				}
+				// find connected group of cells (same char) using flood fill
+				int area = 0; // number of cells in the group
+				HashSet<Integer>[][] normals = new HashSet[newGrid.length][newGrid[0].length];
+				for (int a = 0; a < newGrid.length; a++) {
+					for (int b = 0; b < newGrid[0].length; b++) {
+						normals[a][b] = new HashSet<>();
+					}
+				}
+				// flood fill
+				boolean[][] visited = new boolean[newGrid.length][newGrid[0].length];
+				Queue<int[]> q = new LinkedList<>();
+				q.add(new int[] { i, j });
+				while (!q.isEmpty()) {
+					int[] cell = q.poll();
+					int r = cell[0];
+					int c = cell[1];
+					if (visited[r][c]) {
+						continue;
+					}
+					visited[r][c] = true;
+					if (newGrid[r][c] == newGrid[i][j]) {
+						filled[r][c] = true;
+					}
+					area++;
+					if (r > 0) {
+						if (newGrid[r - 1][c] != newGrid[i][j]) {
+							normals[r - 1][c].add(1); // up
+						} else {
+							q.add(new int[] { r - 1, c });
+						}
+					}
+					if (r < newGrid.length - 1) {
+						if (newGrid[r + 1][c] != newGrid[i][j]) {
+							normals[r + 1][c].add(3); // down
+						} else {
+							q.add(new int[] { r + 1, c });
+						}
+					}
+					if (c < newGrid[0].length - 1) {
+						if (newGrid[r][c + 1] != newGrid[i][j]) {
+							normals[r][c + 1].add(2); // right
+						} else {
+							q.add(new int[] { r, c + 1 });
+						}
+					}
+					if (c > 0) {
+						if (newGrid[r][c - 1] != newGrid[i][j]) {
+							normals[r][c - 1].add(4); // left
+						} else {
+							q.add(new int[] { r, c - 1 });
+						}
+					}
+				}
+				// do a floodfill on nonempty normals (for all values in the normal, do a floodfill)
+				int numSides = 0; // number of unique groups from the floodfill
+				for (int a = 0; a < newGrid.length; a++) {
+					for (int b = 0; b < newGrid[0].length; b++) {
+						if (normals[a][b].isEmpty()) {
+							continue;
+						}
+						HashSet<Integer> org = new HashSet<>(normals[a][b]);
+						for (Integer g : org) {
+							q = new LinkedList<>();
+							q.add(new int[] { a, b });
+							while (!q.isEmpty()) {
+								int[] cell = q.poll();
+								int r = cell[0];
+								int c = cell[1];
+								if (!normals[r][c].contains(g)) {
+									continue;
+								}
+								normals[r][c].remove(g);
+								if (r > 0 && normals[r - 1][c].contains(g)) {
+									q.add(new int[] { r - 1, c });	
+								}
+								if (r < newGrid.length - 1 && normals[r + 1][c].contains(g)) {
+									q.add(new int[] { r + 1, c });
+								}
+								if (c < newGrid[0].length - 1 && normals[r][c + 1].contains(g)) {
+									q.add(new int[] { r, c + 1 });
+								}
+								if (c > 0 && normals[r][c - 1].contains(g)) {
+									q.add(new int[] { r, c - 1 });
+								}
+							}
+							numSides++;
+						}
+						
+					}
+				}
+				cost += area * numSides;
+			}
+		}
+		return cost;
 	}
 
 	static class Kattio extends PrintWriter {
@@ -17,10 +184,12 @@ class Main {
 			super(new BufferedOutputStream(System.out));
 			r = new BufferedReader(new InputStreamReader(i));
 		}
+
 		public Kattio(InputStream i, OutputStream o) {
 			super(new BufferedOutputStream(o));
 			r = new BufferedReader(new InputStreamReader(i));
 		}
+
 		public Kattio(String problemName) throws FileNotFoundException {
 			super(new BufferedOutputStream(new FileOutputStream(problemName + ".out")));
 			try {
@@ -30,6 +199,7 @@ class Main {
 				throw e; // Re-throw the exception to notify the caller
 			}
 		}
+
 		public Kattio(String problemName, OutputStream o) throws FileNotFoundException {
 			super(new BufferedOutputStream(o));
 			try {
@@ -48,7 +218,7 @@ class Main {
 			try {
 				// Mark the current position in the stream
 				r.mark(1000); // 1000 is the buffer size for mark/reset
-				
+
 				// Try to read the next line
 				if (r.readLine() != null) {
 					// If a line is available, reset the reader to the marked position
@@ -66,7 +236,7 @@ class Main {
 			return Integer.parseInt(nextToken());
 		}
 
-		public double getDouble() { 
+		public double getDouble() {
 			return Double.parseDouble(nextToken());
 		}
 
@@ -84,15 +254,17 @@ class Main {
 		private String token;
 
 		private String peekToken() {
-			if (token == null) 
+			if (token == null)
 				try {
-				while (st == null || !st.hasMoreTokens()) {
-					line = r.readLine();
-					if (line == null) return null;
-					st = new StringTokenizer(line);
+					while (st == null || !st.hasMoreTokens()) {
+						line = r.readLine();
+						if (line == null)
+							return null;
+						st = new StringTokenizer(line);
+					}
+					token = st.nextToken();
+				} catch (IOException e) {
 				}
-				token = st.nextToken();
-				} catch (IOException e) { }
 			return token;
 		}
 
@@ -101,7 +273,7 @@ class Main {
 			token = null;
 			return ans;
 		}
-		
+
 		public String getLine() {
 			try {
 				return r.readLine();
@@ -118,7 +290,7 @@ class Main {
 			}
 			return sb.toString();
 		}
-		
+
 		public String[] getLineArr() {
 			return getLine().split(" ");
 		}
@@ -126,84 +298,84 @@ class Main {
 
 	static class ArrayHelper {
 		public static void printArr(int[] array) {
-	        System.out.print("{");
-	        for (int i = 0; i < array.length; i++) {
-	            System.out.print(array[i]);
-	            if (i != array.length - 1) {
-	                System.out.print(", ");
-	            }
-	        }
-	        System.out.print("}\n");
-    	}
+			System.out.print("{");
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i]);
+				if (i != array.length - 1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("}\n");
+		}
 
 		public static void printArr(String[] array) {
-	        System.out.print("{");
-	        for (int i = 0; i < array.length; i++) {
-	            System.out.print(array[i]);
-	            if (i != array.length - 1) {
-	                System.out.print(", ");
-	            }
-	        }
-	        System.out.print("}\n");
-    	}
+			System.out.print("{");
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i]);
+				if (i != array.length - 1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("}\n");
+		}
 
 		public static void printArr(char[] array) {
-	        System.out.print("{");
-	        for (int i = 0; i < array.length; i++) {
-	            System.out.print(array[i]);
-	            if (i != array.length - 1) {
-	                System.out.print(", ");
-	            }
-	        }
-	        System.out.print("}\n");
-    	}
+			System.out.print("{");
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i]);
+				if (i != array.length - 1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("}\n");
+		}
 
 		public static int indexOf(int[] array, int element) {
-	        for (int i = 0; i < array.length; i++) {
-	            if (array[i] == element)
-	                return i;
-	        }
-	        return -1;
-    	}
+			for (int i = 0; i < array.length; i++) {
+				if (array[i] == element)
+					return i;
+			}
+			return -1;
+		}
 
 		public static int indexOf(String[] array, String element) {
-	        for (int i = 0; i < array.length; i++) {
-	            if (array[i].equals(element))
-	                return i;
-	        }
-	        return -1;
-    	}
+			for (int i = 0; i < array.length; i++) {
+				if (array[i].equals(element))
+					return i;
+			}
+			return -1;
+		}
 
 		public static int indexOf(char[] array, char element) {
-	        for (int i = 0; i < array.length; i++) {
-	            if (array[i] == element)
-	                return i;
-	        }
-	        return -1;
-    	}
+			for (int i = 0; i < array.length; i++) {
+				if (array[i] == element)
+					return i;
+			}
+			return -1;
+		}
 
 		public static void swap(int[] array, int index1, int index2) {
-	        int temp = array[index1];
-	        array[index1] = array[index2];
-	        array[index2] = temp;
-    	}
+			int temp = array[index1];
+			array[index1] = array[index2];
+			array[index2] = temp;
+		}
 
 		public static void swap(String[] array, int index1, int index2) {
-	        String temp = array[index1];
-	        array[index1] = array[index2];
-	        array[index2] = temp;
-    	}
+			String temp = array[index1];
+			array[index1] = array[index2];
+			array[index2] = temp;
+		}
 
 		public static void swap(char[] array, int index1, int index2) {
-	        char temp = array[index1];
-	        array[index1] = array[index2];
-	        array[index2] = temp;
-    	}
+			char temp = array[index1];
+			array[index1] = array[index2];
+			array[index2] = temp;
+		}
 
 		public static int min(int[] arr) {
 			int min = Integer.MAX_VALUE;
-			for(int i : arr) {
-				if(i < min)
+			for (int i : arr) {
+				if (i < min)
 					min = i;
 			}
 			return min;
@@ -211,39 +383,39 @@ class Main {
 
 		public static int max(int[] arr) {
 			int max = Integer.MIN_VALUE;
-			for(int i : arr) {
-				if(i > max)
+			for (int i : arr) {
+				if (i > max)
 					max = i;
 			}
 			return max;
 		}
 
 		public static boolean contains(int[] arr, int value) {
-			for(int i : arr) {
-				if(i == value)
+			for (int i : arr) {
+				if (i == value)
 					return true;
 			}
 			return false;
 		}
 
 		public static boolean contains(String[] arr, String value) {
-			for(String i : arr) {
-				if(i.equals(value))
+			for (String i : arr) {
+				if (i.equals(value))
 					return true;
 			}
 			return false;
 		}
 
 		public static boolean contains(char[] arr, char value) {
-			for(char i : arr) {
-				if(i == value)
+			for (char i : arr) {
+				if (i == value)
 					return true;
 			}
 			return false;
 		}
 
 		public static float clamp(float val, float min, float max) {
-    		return Math.max(min, Math.min(max, val));
+			return Math.max(min, Math.min(max, val));
 		}
 
 		public static void reverse(int[] data) {
@@ -254,7 +426,7 @@ class Main {
 		}
 
 		public static int randomInt(int minInclusive, int maxExclusive) {
-			return (int)Math.floor(Math.random()*(maxExclusive-minInclusive+1)+minInclusive);
+			return (int) Math.floor(Math.random() * (maxExclusive - minInclusive + 1) + minInclusive);
 		}
 	}
 
@@ -314,7 +486,7 @@ class Main {
 			return result;
 		}
 	}
-	
+
 	public static class TreeNode<T> {
 		public T data;
 		public TreeNode<T> left;

@@ -14,6 +14,7 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 09](#day-09) | [Website](https://adventofcode.com/2024/day/9)
 - [Day 10](#day-10) | [Website](https://adventofcode.com/2024/day/10)
 - [Day 11](#day-11) | [Website](https://adventofcode.com/2024/day/11)
+- [Day 12](#day-12) | [Website](https://adventofcode.com/2024/day/12)
 
 # Summary by Day
 
@@ -93,3 +94,10 @@ At first, it seemed like a simple simulation problem with a slightly convoluted 
 
 **Part 1**: Time `00:14:56`, Rank `4060`      
 **Part 2**: Time `01:17:24`, Rank `5814`
+
+### Day 12
+
+Wow. Just wow. I did not expect day 12 to hit me so hard. Part 1 was easy enough, using a simple flood fill algorithm to find the area of each connected group and its perimeter and I got around 500th rank on that one. But part 2 asking for the number of sides stumped me with its variety of cases to deal with and just how to approach the problem in general. Shapes could be convex, concave (meaning multiple normal vectors in the same coordinate), have other shapes inside of them, be diagonal from each other, and more. I spent multiple hours trying to solve it using different approaches, as I got increasingly desperate, wanting to quit many times. Finally, I realized that I could just use flood fill on the normals and count the number of distinct groups to get the number of sides. After 2 and a half hours, I'm pleasantly surprised I still got 5000th place! That was a nasty problem.
+
+**Part 1**: Time `00:08:33`, Rank `554`      
+**Part 2**: Time `02:29:35`, Rank `5125`
