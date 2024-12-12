@@ -9,9 +9,12 @@ class Main {
 
 		// input
 		String[] lines = io.getAll().split("\n");
-		char[][] grid = new char[lines.length][lines[0].length()];
+		char[][] grid = new char[lines.length + 2][lines[0].length() + 2]; // create padded grid to prevent out of bounds
 		for(int i = 0; i < lines.length; i++) {
-			grid[i] = lines[i].toCharArray();
+			char[] arr = lines[i].toCharArray();
+			for (int j = 0; j < arr.length; j++) {
+				grid[i + 1][j + 1] = arr[j];
+			}
 		}
 
 		// part 1
@@ -28,8 +31,8 @@ class Main {
 	static int part1(char[][] grid) {
 		int cost = 0;
 		boolean[][] visited = new boolean[grid.length][grid[0].length];
-		for (int i = 0; i < grid.length; i++) {
-			for(int j = 0; j < grid[0].length; j++) {
+		for (int i = 1; i < grid.length-1; i++) {
+			for(int j = 1; j < grid[0].length-1; j++) {
 				if (visited[i][j]) {
 					continue;
 				}
@@ -42,8 +45,7 @@ class Main {
 					int[] cell = q.poll();
 					int r = cell[0];
 					int c = cell[1];
-					if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length
-							|| (visited[r][c] && grid[r][c] != grid[i][j]) || grid[r][c] != grid[i][j]) {
+					if (grid[r][c] != grid[i][j]) {
 						perimeter++;
 						continue;
 					}
@@ -65,34 +67,23 @@ class Main {
 
 	@SuppressWarnings("unchecked")
 	static int part2(char[][] grid) {
-		// pad the grid with a border of '.' to avoid out of bounds errors
-		char[][] newGrid = new char[grid.length + 2][grid[0].length + 2];
-		for (int i = 0; i < newGrid.length; i++) {
-			for (int j = 0; j < newGrid[0].length; j++) {
-				if (i == 0 || i == newGrid.length - 1 || j == 0 || j == newGrid[0].length - 1) {
-					newGrid[i][j] = '.';
-				} else {
-					newGrid[i][j] = grid[i - 1][j - 1];
-				}
-			}
-		}
 		int cost = 0;
-		boolean[][] filled = new boolean[newGrid.length][newGrid[0].length];
-		for(int i = 1; i < newGrid.length - 1; i++) {
-			for (int j = 1; j < newGrid[0].length - 1; j++) {
+		boolean[][] filled = new boolean[grid.length][grid[0].length];
+		for(int i = 1; i < grid.length - 1; i++) {
+			for (int j = 1; j < grid[0].length - 1; j++) {
 				if (filled[i][j]) {
 					continue;
 				}
 				// find connected group of cells (same char) using flood fill
 				int area = 0; // number of cells in the group
-				HashSet<Integer>[][] normals = new HashSet[newGrid.length][newGrid[0].length];
-				for (int a = 0; a < newGrid.length; a++) {
-					for (int b = 0; b < newGrid[0].length; b++) {
+				HashSet<Integer>[][] normals = new HashSet[grid.length][grid[0].length];
+				for (int a = 0; a < grid.length; a++) {
+					for (int b = 0; b < grid[0].length; b++) {
 						normals[a][b] = new HashSet<>();
 					}
 				}
 				// flood fill
-				boolean[][] visited = new boolean[newGrid.length][newGrid[0].length];
+				boolean[][] visited = new boolean[grid.length][grid[0].length];
 				Queue<int[]> q = new LinkedList<>();
 				q.add(new int[] { i, j });
 				while (!q.isEmpty()) {
@@ -103,33 +94,33 @@ class Main {
 						continue;
 					}
 					visited[r][c] = true;
-					if (newGrid[r][c] == newGrid[i][j]) {
+					if (grid[r][c] == grid[i][j]) {
 						filled[r][c] = true;
 					}
 					area++;
 					if (r > 0) {
-						if (newGrid[r - 1][c] != newGrid[i][j]) {
+						if (grid[r - 1][c] != grid[i][j]) {
 							normals[r - 1][c].add(1); // up
 						} else {
 							q.add(new int[] { r - 1, c });
 						}
 					}
-					if (r < newGrid.length - 1) {
-						if (newGrid[r + 1][c] != newGrid[i][j]) {
+					if (r < grid.length - 1) {
+						if (grid[r + 1][c] != grid[i][j]) {
 							normals[r + 1][c].add(3); // down
 						} else {
 							q.add(new int[] { r + 1, c });
 						}
 					}
-					if (c < newGrid[0].length - 1) {
-						if (newGrid[r][c + 1] != newGrid[i][j]) {
+					if (c < grid[0].length - 1) {
+						if (grid[r][c + 1] != grid[i][j]) {
 							normals[r][c + 1].add(2); // right
 						} else {
 							q.add(new int[] { r, c + 1 });
 						}
 					}
 					if (c > 0) {
-						if (newGrid[r][c - 1] != newGrid[i][j]) {
+						if (grid[r][c - 1] != grid[i][j]) {
 							normals[r][c - 1].add(4); // left
 						} else {
 							q.add(new int[] { r, c - 1 });
@@ -138,13 +129,13 @@ class Main {
 				}
 				// do a floodfill on nonempty normals (for all values in the normal, do a floodfill)
 				int numSides = 0; // number of unique groups from the floodfill
-				for (int a = 0; a < newGrid.length; a++) {
-					for (int b = 0; b < newGrid[0].length; b++) {
+				for (int a = 0; a < grid.length; a++) {
+					for (int b = 0; b < grid[0].length; b++) {
 						if (normals[a][b].isEmpty()) {
 							continue;
 						}
-						HashSet<Integer> org = new HashSet<>(normals[a][b]);
-						for (Integer g : org) {
+						HashSet<Integer> original = new HashSet<>(normals[a][b]);
+						for (Integer g : original) {
 							q = new LinkedList<>();
 							q.add(new int[] { a, b });
 							while (!q.isEmpty()) {
@@ -158,10 +149,10 @@ class Main {
 								if (r > 0 && normals[r - 1][c].contains(g)) {
 									q.add(new int[] { r - 1, c });	
 								}
-								if (r < newGrid.length - 1 && normals[r + 1][c].contains(g)) {
+								if (r < grid.length - 1 && normals[r + 1][c].contains(g)) {
 									q.add(new int[] { r + 1, c });
 								}
-								if (c < newGrid[0].length - 1 && normals[r][c + 1].contains(g)) {
+								if (c < grid[0].length - 1 && normals[r][c + 1].contains(g)) {
 									q.add(new int[] { r, c + 1 });
 								}
 								if (c > 0 && normals[r][c - 1].contains(g)) {
