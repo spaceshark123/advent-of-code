@@ -15,6 +15,7 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 10](#day-10) | [Website](https://adventofcode.com/2024/day/10)
 - [Day 11](#day-11) | [Website](https://adventofcode.com/2024/day/11)
 - [Day 12](#day-12) | [Website](https://adventofcode.com/2024/day/12)
+- [Day 13](#day-13) | [Website](https://adventofcode.com/2024/day/13)
 
 # Summary by Day
 
@@ -101,3 +102,10 @@ Wow. Just wow. I did not expect day 12 to hit me so hard. Part 1 was easy enough
 
 **Part 1**: Time `00:08:33`, Rank `554`      
 **Part 2**: Time `02:29:35`, Rank `5125`
+
+### Day 13
+
+Day 13 was hard, but a fun problem! It involved optimization, so I instantly thought of dynamic programming and a very similar problem I had seen before, first implementing a recursive solution, then using memoization to speed it up. This passed part 1 with O(n^2) runtime. However, the challenge introduced by part 2 was too big for even dp to solve in reasonable time. After being stumped for a while, I realized that this was just a system of equations (specifically diophantine equations with nonnegative solutions), which I could solve using linear algebra and Cramer's rule in O(1) constant runtime. It was fun and unexpected to have to use a direct math solution instead of a cs algorithm. I spent a long time figuring out what do to in the case of infinite solutions to the system, in which case I actually had to minimize the tokens, but later found out that apparently none of the inputs in the problem actually covered this case, so I could have just skipped it. That would have been bad for completion's sake though, so I'm glad I did the full problem.
+
+**Part 1**: Time `00:27:22`, Rank `2962`      
+**Part 2**: Time `01:48:54`, Rank `5111`
