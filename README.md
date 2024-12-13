@@ -1,8 +1,10 @@
-# Advent of Code 2024
+# Advent of Code
  
-These are my submissions to the 2024 Advent of Code (AoC) challenge. They are written in Java, and organized by day. Also included is my Java source code template for Advent of Code and other competitive programming contests. The solutions are usually hacked together by me during the first few minutes of each day's competition, then I go back and refine my solution to clean up my code and do optimizations. My thoughts on each day, along with my time and rankings are also provided.
+These are my submissions to all the Advent of Code (AoC) challenges that I have participated in thus far (starting in 2024). They are written in Java, and organized by day. Also included is my Java source code template for Advent of Code and other competitive programming contests. The solutions are usually hacked together by me during the first few minutes of each day's competition, then I go back and refine my solution to clean up my code and do optimizations. My thoughts on each day, along with my time and rankings are also provided.
 
 # Table of Contents
+
+### [2024](https://adventofcode.com/2024)
 - [Day 01](#day-01) | [Website](https://adventofcode.com/2024/day/1)
 - [Day 02](#day-02) | [Website](https://adventofcode.com/2024/day/2)
 - [Day 03](#day-03) | [Website](https://adventofcode.com/2024/day/3)
@@ -18,6 +20,8 @@ These are my submissions to the 2024 Advent of Code (AoC) challenge. They are wr
 - [Day 13](#day-13) | [Website](https://adventofcode.com/2024/day/13)
 
 # Summary by Day
+
+## 2024
 
 ### Day 01
 
