@@ -3,13 +3,91 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	//dp
+	static HashMap<Long, HashMap<Long, Long>> dp;
+	
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day13", System.out);
 
+		// input
+		long part1Sum = 0;
+		long part2Sum = 0;
+		while (io.hasNextLine()) {
+			String[] A = io.getLineArr(); // costs 3 tokens per move
+			String[] B = io.getLineArr(); // costs 1 token per move
+			String[] Goal = io.getLineArr();
+			io.getLine(); // skip empty line
+			long a_x = Long.parseLong(A[2].substring(1, A[2].length() - 1));
+			long a_y = Long.parseLong(A[3].substring(1));
+			long b_x = Long.parseLong(B[2].substring(1, B[2].length() - 1));
+			long b_y = Long.parseLong(B[3].substring(1));
+			long goal_x = Long.parseLong(Goal[1].substring(2, Goal[1].length() - 1));
+			long goal_y = Long.parseLong(Goal[2].substring(2));
 
+			// solve both parts using the efficient O(1) solution
+			long min_tokens_1 = solve_v2(a_x, a_y, b_x, b_y, goal_x, goal_y);
+			long min_tokens_2 = solve_v2(a_x, a_y, b_x, b_y, goal_x + 10000000000000L, goal_y + 10000000000000L);
+			part1Sum += min_tokens_1 > 0 ? min_tokens_1 : 0;
+			part2Sum += min_tokens_2 > 0 ? min_tokens_2 : 0;
+		}
+
+		// output
+		io.println(part1Sum);
+		io.println(part2Sum);
 
 		io.close();
+	}
+	
+	static long solve_v1(long a_x, long a_y, long b_x, long b_y, long goal_x, long goal_y) {
+		// dynamic programming to solve in O(goal_x * goal_y) time
+		// this solution is still too slow for the second part
+		if (goal_x == 0 && 0 == goal_y) {
+			return 0;
+		}
+		if (dp.get(goal_x).get(goal_y) != 0) {
+			return dp.get(goal_x).get(goal_y); // memoization
+		}
+		// branch: last move was a
+		long ans1 = goal_x < a_x || goal_y < a_y ? Long.MAX_VALUE : 3 + solve_v1(a_x, a_y, b_x, b_y, goal_x - a_x, goal_y - a_y);
+		// branch: last move was b
+		long ans2 = goal_x < b_x || goal_y < b_y ? Long.MAX_VALUE : 1 + solve_v1(a_x, a_y, b_x, b_y, goal_x - b_x, goal_y - b_y);
+		ans1 = ans1 < 0 ? Long.MAX_VALUE : ans1; // if ans1 is negative, it means it's impossible to reach the goal
+		ans2 = ans2 < 0 ? Long.MAX_VALUE : ans2; // if ans2 is negative, it means it's impossible to reach the goal
+		long ans = Math.min(ans1, ans2);
+		if (ans == Long.MAX_VALUE) {
+			// if both branches are impossible, it's impossible to reach the goal
+			dp.get(goal_x).put(goal_y, Long.MIN_VALUE);
+			return Long.MIN_VALUE;
+		}
+		dp.get(goal_x).put(goal_y, ans);
+		return ans;
+	}
+
+	static long solve_v2(long a_x, long a_y, long b_x, long b_y, long goal_x, long goal_y) {
+		// cramers rule to solve in O(1) time
+		long det = a_x * b_y - a_y * b_x;
+		long num1 = (goal_x * b_y - goal_y * b_x);
+		long num2 = (goal_y * a_x - goal_x * a_y);
+		if (det == 0) {
+			if (num1 == 0 || num2 == 0) {
+				// if either of the numerators is 0, the system of equations has no solution
+				return -1;
+			} else {
+				// infinite solutions, minimize tokens with nonnegative a and b
+				// since tokens = 3a + b, we can minimize a to at most 0 (maximize b) to minimize tokens
+				// since the line have a non-integer y-intercept, we have to round down y(0), then solve for x(floor(y(0)))
+				long y = (goal_x - 0 * a_x) / b_x; // implicitly rounds down
+				return 3 * ((b_x * y - goal_x) / a_x) + y;
+			}
+		}
+		long a = num1 / det;
+		long b = num2 / det;
+		if (num1 % det != 0 || num2 % det != 0 || a < 0 || b < 0) {
+			// no integer solution or has negative button presses (which is impossible)
+			return -1;
+		}
+		return 3*a + b;
 	}
 
 	static class Kattio extends PrintWriter {
