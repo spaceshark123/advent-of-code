@@ -45,8 +45,9 @@ class Main {
 		long part1 = part1(robots);
 		System.out.println(part1);
 
-		// part 2 (manual)
-		part2(robots);
+		// part 2 old vs new (manual) 
+		// part2_old(robots); // much slower
+		part2(robots); // optimized
 
 		io.close();
 	}
@@ -75,7 +76,8 @@ class Main {
 		return q1Count * q2Count * q3Count * q4Count;
 	}
 
-	static void part2(Robot[] robots) {
+	static void part2_old(Robot[] robots) {
+		long startTime = System.currentTimeMillis();
 		// find some interesting timesteps and display to user
 		Scanner scan = new Scanner(System.in);
 		StringBuilder sb = new StringBuilder();
@@ -105,6 +107,8 @@ class Main {
 				}
 			}
 			if (maxStreak > 10) {
+				long endTime = System.currentTimeMillis();
+				System.out.println("Time taken: " + (endTime - startTime) + "ms");
 				// this might be important, show the grid to the user
 				System.out.println("SECOND " + (i + 1));
 				sb.setLength(0); // clear the stringbuilder
@@ -127,6 +131,62 @@ class Main {
 				if (line.contains("q")) {
 					break;
 				}
+				startTime = System.currentTimeMillis();
+				System.out.println("Finding interesting timesteps...\n\n\n\n");
+			}
+		}
+		scan.close();
+	}
+
+	static void part2(Robot[] robots) {
+		long startTime = System.currentTimeMillis();
+		// find some interesting timesteps and display to user
+		Scanner scan = new Scanner(System.in);
+		StringBuilder sb = new StringBuilder();
+		System.out.println("Finding interesting timesteps...\n\n\n\n");
+		for (int i = 0;; i++) {
+			// move all robots one time step
+			Arrays.stream(robots).forEach(r -> r.step(1));
+
+			// count the number of robots at each position
+			int[][] positionMap = new int[WIDTH][HEIGHT];
+			for (int j = 0; j < robots.length; j++) {
+				positionMap[robots[j].x][robots[j].y]++;
+			}
+			// Calculate the max streak of robots in a row
+			int maxStreak = 0;
+			for (int j = 0; j < HEIGHT; j++) {
+				int streak = 0;
+				for (int k = 0; k < WIDTH; k++) {
+					if (positionMap[k][j] > 0) {
+						streak++;
+					} else {
+						maxStreak = Math.max(maxStreak, streak);
+						streak = 0;
+					}
+				}
+				maxStreak = Math.max(maxStreak, streak);  // End-of-row streak
+			}
+			if (maxStreak > 10) {
+				long endTime = System.currentTimeMillis();
+				System.out.println("Time taken: " + (endTime - startTime) + "ms");
+				// this might be important, show the grid to the user
+				System.out.println("SECOND " + (i + 1));
+				sb.setLength(0); // clear the stringbuilder
+				for (int j = 0; j < HEIGHT; j++) {
+					for (int k = 0; k < WIDTH; k++) {
+						sb.append(positionMap[k][j] > 0 ? positionMap[k][j] : ".");
+					}
+					sb.append("\n");
+				}
+				System.out.println(sb.toString());
+				//wait for user input
+				System.out.println("Press enter to continue");
+				String line = scan.nextLine();
+				if (line.contains("q")) {
+					break;
+				}
+				startTime = System.currentTimeMillis();
 				System.out.println("Finding interesting timesteps...\n\n\n\n");
 			}
 		}
