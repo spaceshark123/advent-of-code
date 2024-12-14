@@ -3,13 +3,134 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static int WIDTH = 101;
+	static int HEIGHT = 103;
+
+	// robot class
+	static class Robot {
+		int x;
+		int y;
+		int v_x;
+		int v_y;
+
+		void step(int n) {
+			x = (x + v_x * n) % WIDTH;
+			y = (y + v_y * n) % HEIGHT;
+			while (x < 0) {
+				x += WIDTH;
+			}
+			while (y < 0) {
+				y += HEIGHT;
+			}
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day14", System.out);
 
+		// input
+		String[] lines = io.getAll().split("\n");
+		Robot[] robots = new Robot[lines.length];
+		for (int i = 0; i < lines.length; i++) {
+			String[] parts = lines[i].split(" ");
+			robots[i] = new Robot();
+			robots[i].x = Integer.parseInt(parts[0].substring(2, parts[0].indexOf(",")));
+			robots[i].y = Integer.parseInt(parts[0].substring(parts[0].indexOf(",") + 1));
+			robots[i].v_x = Integer.parseInt(parts[1].substring(2, parts[1].indexOf(",")));
+			robots[i].v_y = Integer.parseInt(parts[1].substring(parts[1].indexOf(",") + 1));
+		}
 
+		// part 1
+		long part1 = part1(robots);
+		System.out.println(part1);
+
+		// part 2 (manual)
+		part2(robots);
 
 		io.close();
+	}
+
+	static long part1(Robot[] robots) {
+		// counts for each quadrant (not counting the middle of each axis)
+		int middleX = WIDTH / 2;
+		int middleY = HEIGHT / 2;
+		long q1Count = 0;
+		long q2Count = 0;
+		long q3Count = 0;
+		long q4Count = 0;
+		for (int i = 0; i < robots.length; i++) {
+			robots[i].step(100);
+			// check which quadrant the robot is in
+			if (robots[i].x < middleX && robots[i].y < middleY) {
+				q1Count++;
+			} else if (robots[i].x > middleX && robots[i].y < middleY) {
+				q2Count++;
+			} else if (robots[i].x < middleX && robots[i].y > middleY) {
+				q3Count++;
+			} else if (robots[i].x > middleX && robots[i].y > middleY) {
+				q4Count++;
+			}
+		}
+		return q1Count * q2Count * q3Count * q4Count;
+	}
+
+	static void part2(Robot[] robots) {
+		// find some interesting timesteps and display to user
+		Scanner scan = new Scanner(System.in);
+		StringBuilder sb = new StringBuilder();
+		System.out.println("Finding interesting timesteps...\n\n\n\n");
+		for (int i = 0; i < 10000; i++) {
+			// move all robots one time step
+			Arrays.stream(robots).parallel().forEach(r -> r.step(1));
+			// calculate the max streak of robots in a row (this might indicate some clustering that could form the tree)
+			int maxStreak = 0;
+			for (int j = 0; j < HEIGHT; j++) {
+				int streak = 0;
+				for (int k = 0; k < WIDTH; k++) {
+					int count = 0;
+					for (int l = 0; l < robots.length; l++) {
+						if (robots[l].x == k && robots[l].y == j) {
+							count++;
+						}
+					}
+					if (count != 0) {
+						streak++;
+					} else {
+						if (streak > maxStreak) {
+							maxStreak = streak;
+						}
+						streak = 0;
+					}
+				}
+			}
+			if (maxStreak > 10) {
+				// this might be important, show the grid to the user
+				System.out.println("SECOND " + (i + 1));
+				sb.setLength(0); // clear the stringbuilder
+				for (int j = 0; j < HEIGHT; j++) {
+					for (int k = 0; k < WIDTH; k++) {
+						int count = 0;
+						for (int l = 0; l < robots.length; l++) {
+							if (robots[l].x == k && robots[l].y == j) {
+								count++;
+							}
+						}
+						sb.append(count == 0 ? "." : count);
+					}
+					sb.append("\n");
+				}
+				System.out.println(sb.toString());
+				//wait for user input
+				System.out.println("Press enter to continue");
+				String line = scan.nextLine();
+				if (line.contains("q")) {
+					break;
+				}
+				System.out.println("Finding interesting timesteps...\n\n\n\n");
+			}
+		}
+		scan.close();
 	}
 
 	static class Kattio extends PrintWriter {

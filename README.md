@@ -18,6 +18,7 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 11](#day-11) | [Website](https://adventofcode.com/2024/day/11)
 - [Day 12](#day-12) | [Website](https://adventofcode.com/2024/day/12)
 - [Day 13](#day-13) | [Website](https://adventofcode.com/2024/day/13)
+- [Day 14](#day-14) | [Website](https://adventofcode.com/2024/day/14)
 
 # Summary by Day
 
@@ -113,3 +114,10 @@ Day 13 was hard, but a fun problem! It involved optimization, so I instantly tho
 
 **Part 1**: Time `00:27:22`, Rank `2962`      
 **Part 2**: Time `01:48:54`, Rank `5111`
+
+### Day 14
+
+Part 1 was trivial, with a simple simulation through 100 timesteps after creating a custom robot class and step function. Part 2, though, was "fun" (I say with quotations because the problem itself was actually very vaguely defined). We had to find the timestep in which a "tree" appeared in the grid, with no further explanation. Since I had no way of knowing what the author meant by a tree, I started manually going through every single timestep. Then, I guessed that the tree would probably have a lot of robots next to each other, so I started selecting the timesteps with above a certain threshold of consecutive robots, which actually worked and I found the tree! Pretty cool to see.
+
+**Part 1**: Time `00:14:53`, Rank `1282`      
+**Part 2**: Time `00:59:02`, Rank `2653`
