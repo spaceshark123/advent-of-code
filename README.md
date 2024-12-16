@@ -19,6 +19,8 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 12](#day-12) | [Website](https://adventofcode.com/2024/day/12)
 - [Day 13](#day-13) | [Website](https://adventofcode.com/2024/day/13)
 - [Day 14](#day-14) | [Website](https://adventofcode.com/2024/day/14)
+- [Day 15](#day-15) | [Website](https://adventofcode.com/2024/day/15)
+- [Day 16](#day-16) | [Website](https://adventofcode.com/2024/day/16)
 
 # Summary by Day
 
@@ -121,3 +123,17 @@ Part 1 was trivial, with a simple simulation through 100 timesteps after creatin
 
 **Part 1**: Time `00:14:53`, Rank `1282`      
 **Part 2**: Time `00:59:02`, Rank `2653`
+
+### Day 15
+
+I wasn't feeling well, so I didn't try to compete in the day 15 leaderboards, and looked at the problem the next day. The problem description seemed like a very straightforward simulation problem, and part 1 was quick, but part 2 spiced things up with the fact that pushing a single block could push multiple other blocks, possibly starting a chain reaction. I had to propagate the push testing logic throughout the blocks, which needed some pretty involved steps. But good problem overall.
+
+**Part 1**: Time `23:48:24`, Rank `30116`      
+**Part 2**: Time `>24h`, Rank `21598`
+
+### Day 16
+
+a maze solving problem! Very interesting, but I feel like this type of problem has been asked a lot, so I was expected a lower rank than normal, with people just copy-pasting from their previous code. I solved using Djikstra's algorithm to get the minimum score for part 1 (the maze was like a weighted graph between nodes defined by x,y,dir), and used some backtracking to reconstruct the paths for part 2. I'm noticing a lot of 2D grid problems lately, let's see if the trend continues.
+
+**Part 1**: Time `00:21:05`, Rank `1391`      
+**Part 2**: Time `00:36:19`, Rank `929`
