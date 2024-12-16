@@ -3,13 +3,182 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static int[][][] dp; // store min score to reach (i,j) from start
+	static HashMap<String, HashSet<String>> prev = new HashMap<>(); // (i,j,d) -> all prev (i,j,d) for reconstructing path
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day16", System.out);
 
+		// input
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[lines.length][lines[0].length()];
+		for (int i = 0; i < lines.length; i++) {
+			grid[i] = lines[i].toCharArray();
+		}
+		// find start (x,y) where grid[x][y] == 'S'
+		int x = 0, y = 0;
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				if (grid[i][j] == 'S') {
+					x = i;
+					y = j;
+					break;
+				}
+			}
+		}
 
+		// init dp
+		dp = new int[grid.length][grid[0].length][4];
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				// all 4 directions
+				dp[i][j][0] = Integer.MAX_VALUE;
+				dp[i][j][1] = Integer.MAX_VALUE;
+				dp[i][j][2] = Integer.MAX_VALUE;
+				dp[i][j][3] = Integer.MAX_VALUE;
+			}
+		}
+
+		dp[x][y][1] = 0; // 0 score to start
+		long[] result = solve(grid, x, y, 1); // solve maze
+
+		// part 1
+		long minScore = result[0];
+		io.println(minScore);
+
+		// part 2
+		long numCells = result[1];
+		io.println(numCells);
 
 		io.close();
+	}
+
+	static long[] solve(char[][] grid, int x, int y, int dir) {
+		// return (minimum score, # cells visited in all optimal paths)
+		Queue<int[]> q = new LinkedList<>();
+		HashSet<String> unvisited = new HashSet<>();
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				for (int k = 0; k < 4; k++) {
+					unvisited.add(i + "," + j + "," + k);
+				}
+			}
+		}
+		q.add(new int[] { x, y, dir });
+		int[] dx = { -1, 0, 1, 0 };
+		int[] dy = { 0, 1, 0, -1 };
+		int exitX = 0, exitY = 0;
+		// dijkstra's algorithm to find shortest path to all cells/directions
+		while (!q.isEmpty() && !unvisited.isEmpty()) {
+			int[] cur = q.poll();
+			int i = cur[0];
+			int j = cur[1];
+			int d = cur[2];
+			unvisited.remove(i + "," + j + "," + d);
+			if (grid[i][j] == 'E') {
+				// reached exit
+				exitY = i;
+				exitX = j;
+			}
+			// move forward
+			int ni = i + dx[d];
+			int nj = j + dy[d];
+			if (ni >= 0 && ni < grid.length && nj >= 0 && nj < grid[ni].length && grid[ni][nj] != '#') {
+				if (dp[ni][nj][d] > dp[i][j][d] + 1) {
+					dp[ni][nj][d] = dp[i][j][d] + 1;
+					prev.put(ni + "," + nj + "," + d, new HashSet<>()); // clear prev
+					prev.get(ni + "," + nj + "," + d).add(i + "," + j + "," + d); // add prev (only 1 prev)
+					q.add(new int[] { ni, nj, d });
+				} else if (dp[ni][nj][d] == dp[i][j][d] + 1) {
+					prev.putIfAbsent(ni + "," + nj + "," + d, new HashSet<>()); // init prev
+					prev.get(ni + "," + nj + "," + d).add(i + "," + j + "," + d); // add prev (add multiple prev)
+					q.add(new int[] { ni, nj, d });
+				}
+			}
+			// turn left
+			int nd = (d + 3) % 4;
+			if (dp[i][j][nd] > dp[i][j][d] + 1000) {
+				dp[i][j][nd] = dp[i][j][d] + 1000;
+				prev.put(i + "," + j + "," + nd, new HashSet<>()); // clear prev
+				prev.get(i + "," + j + "," + nd).add(i + "," + j + "," + d); // add prev (only 1 prev)
+				q.add(new int[] { i, j, nd });
+			} else if (dp[i][j][nd] == dp[i][j][d] + 1000) {
+				prev.putIfAbsent(i + "," + j + "," + nd, new HashSet<>()); // init prev
+				prev.get(i + "," + j + "," + nd).add(i + "," + j + "," + d); // add prev (add multiple prev)
+				q.add(new int[] { i, j, nd });
+			}
+			// turn right
+			nd = (d + 1) % 4;
+			if (dp[i][j][nd] > dp[i][j][d] + 1000) {
+				dp[i][j][nd] = dp[i][j][d] + 1000;
+				prev.put(i + "," + j + "," + nd, new HashSet<>()); // clear prev
+				prev.get(i + "," + j + "," + nd).add(i + "," + j + "," + d); // add prev (only 1 prev)
+				q.add(new int[] { i, j, nd });
+			} else if (dp[i][j][nd] == dp[i][j][d] + 1000) {
+				prev.putIfAbsent(i + "," + j + "," + nd, new HashSet<>()); // init prev
+				prev.get(i + "," + j + "," + nd).add(i + "," + j + "," + d); // add prev (add multiple prev)
+				q.add(new int[] { i, j, nd });
+			}
+		}
+		// return min dp
+		long minScore = Long.MAX_VALUE;
+		int minDir = 0;
+		for (int k = 0; k < 4; k++) {
+			if (dp[exitY][exitX][k] < minScore) {
+				minScore = dp[exitY][exitX][k];
+				minDir = k;
+			}
+		}
+		// reconstruct path and count all
+		HashSet<String> visited = new HashSet<>();
+		q = new LinkedList<>();
+		q.add(new int[] { exitY, exitX, minDir });
+		while (!q.isEmpty()) {
+			int[] cur = q.poll();
+			int i = cur[0];
+			int j = cur[1];
+			int d = cur[2];
+			if (visited.contains(i + "," + j + "," + d)) {
+				continue;
+			}
+			visited.add(i + "," + j + "," + d);
+			if (grid[i][j] == 'S') {
+				break; // reached start, path is complete
+			}
+			// backtrack and add all prev
+			for (String p : prev.get(i + "," + j + "," + d)) {
+				String[] parts = p.split(",");
+				int ni = Integer.parseInt(parts[0]);
+				int nj = Integer.parseInt(parts[1]);
+				int nd = Integer.parseInt(parts[2]);
+				q.add(new int[] { ni, nj, nd });
+			}
+		}
+		// show grid with path
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[i].length; j++) {
+				if (visited.contains(i + "," + j + "," + 0)) {
+					System.out.print("\033[31m^\033[0m ");
+				} else if (visited.contains(i + "," + j + "," + 1)) {
+					System.out.print("\033[31m>\033[0m ");
+				} else if (visited.contains(i + "," + j + "," + 2)) {
+					System.out.print("\033[31mv\033[0m ");
+				} else if (visited.contains(i + "," + j + "," + 3)) {
+					System.out.print("\033[31m<\033[0m ");
+				} else {
+					System.out.print(grid[i][j] + " ");
+				}
+			}
+			System.out.println();
+		}
+		// count all visited (unique coords, direction doesn't matter)
+		HashSet<String> visitedCoords = new HashSet<>();
+		for (String v : visited) {
+			String[] parts = v.split(",");
+			visitedCoords.add(parts[0] + "," + parts[1]);
+		}
+		return new long[] { minScore, visitedCoords.size() };
 	}
 
 	static class Kattio extends PrintWriter {
