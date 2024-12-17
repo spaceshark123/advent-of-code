@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.stream.LongStream;
 import java.io.*;
 import java.lang.*;
 
@@ -7,9 +8,134 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day17", System.out);
 
+		// input
+		long A = Long.parseLong(io.getLine().split(" ")[2]);
+		long B = Long.parseLong(io.getLine().split(" ")[2]);
+		long C = Long.parseLong(io.getLine().split(" ")[2]);
+		io.getLine(); // skip empty line
+		String[] instructions = io.getLine().split(" ")[1].split(",");
+		StringBuilder progNum = new StringBuilder();
+		int[] program = new int[instructions.length];
+		for (int i = 0; i < instructions.length; i++) {
+			program[i] = Integer.parseInt(instructions[i]);
+			progNum.append(instructions[i]);
+		}
 
+		// part 1
+		String out = solve(program, A, B, C);
+		for (int i = 0; i < out.length(); i++) {
+			if (i == out.length() - 1) {
+				io.print(out.charAt(i));
+			} else {
+				io.print(out.charAt(i) + ",");
+			}
+		}
+		io.println();
 
+		// part 2
+		long A2 = reverseEngineer(progNum.toString()); // first try to reverse engineer A
+		io.println("found possible A: " + A2);
+		String out2 = solve2(A2);
+		io.println("target: " + progNum);
+		io.println("got   : " + out2);
+		if(out2.equals(progNum.toString())) {
+			io.println("Success!");
+		} else { // if not, perform brute-force search around the possible A
+			io.println("Failed! performing search around possible A...");
+			io.flush();
+			search(A2 - 1_000_000L, A2 + 1_000_000L, progNum.toString());
+		}
+		
 		io.close();
+	}
+
+	static void search(long minA, long maxA, String progNumFinal) {
+		LongStream.range(minA, maxA).parallel().forEach(g -> {
+			String out = solve2(g);
+			// check if output is same as program
+			if (out.equals(progNumFinal)) {
+				System.out.println("Found A: " + g);
+				System.exit(0);
+			}
+		});
+	}
+
+	static String solve(int[] program, long A, long B, long C) {
+		StringBuilder out = new StringBuilder();
+		for (int i = 0; i < program.length; i += 2) {
+			int instruction = program[i];
+			long operand = (long) program[i + 1];
+			if (instruction == 0) {
+				A = A >> combo(operand, A, B, C);
+			} else if (instruction == 1) {
+				B = B ^ operand;
+			} else if (instruction == 2) {
+				B = combo(operand, A, B, C) % 8;
+			} else if (instruction == 3 && A != 0) {
+				i = (int) operand - 2;
+			} else if (instruction == 4) {
+				B = B ^ C;
+			} else if (instruction == 5) {
+				out.append(combo(operand, A, B, C) % 8);
+			} else if (instruction == 6) {
+				B = A >> combo(operand, A, B, C);
+			} else if (instruction == 7) {
+				C = A >> combo(operand, A, B, C);
+			}
+		}
+		return out.toString();
+	}
+
+	static long reverseEngineer(String program) {
+		// figure out octal A from program
+		long A = 0;
+		for (int i = program.length() - 1; i >= 0; i--) {
+			// try all digits from 0 to 7 and see if it creates the same output
+			long digit = Long.parseLong(program.charAt(i) + "");
+			boolean found = false;
+			for (int j = 0; j < 8; j++) {
+				if (out(A * 8 + j) == digit) {
+					// add digit to A
+					A = A * 8 + j;
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				A *= 8;
+			}
+		}
+		return A;
+	}
+
+	// solve function specifically for part 2 (decompiled program)
+	static String solve2(long A) {
+		StringBuilder out = new StringBuilder();
+		while (A != 0) {
+			out.append(out(A));
+			A = A >> 3;
+		}
+		return out.toString();
+	}
+	
+	// decompiled out function (for part 2)
+	static long out(long A) {
+		//out((((A % 8) ^ 1) ^ 5) ^ (A >> ((A % 8) ^ 1)) % 8)
+		return ((((A % 8) ^ 1) ^ 5) ^ (A >> ((A % 8) ^ 1))) % 8;
+	}
+	
+	static long combo(long operand, long A, long B, long C) {
+		if (operand <= 3) {
+			return (long)operand;
+		}
+		if (operand == 4) {
+			return A;
+		} else if (operand == 5) {
+			return B;
+		} else if (operand == 6) {
+			return C;
+		}
+		return 0;
 	}
 
 	static class Kattio extends PrintWriter {
