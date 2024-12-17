@@ -21,6 +21,7 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 14](#day-14) | [Website](https://adventofcode.com/2024/day/14)
 - [Day 15](#day-15) | [Website](https://adventofcode.com/2024/day/15)
 - [Day 16](#day-16) | [Website](https://adventofcode.com/2024/day/16)
+- [Day 17](#day-17) | [Website](https://adventofcode.com/2024/day/17)
 
 # Summary by Day
 
@@ -137,3 +138,10 @@ a maze solving problem! Very interesting, but I feel like this type of problem h
 
 **Part 1**: Time `00:21:05`, Rank `1391`      
 **Part 2**: Time `00:36:19`, Rank `929`
+
+### Day 17
+
+Absolutely gory problem. Part 1 started innocently enough, creating a simple virtual machine with instructions reminiscent of assembly or machine code. But part 2 was a doozy. No obvious solutions came to my head except brute force, which I tried unsuccessfully for a few hours, and even parallelized using java streams. While doing this, I analyzed the program and decompiled it into its bare logic, and figured out that the program uses 1 octal digit of A (3 bits) for every digit of output. So I created a reverse engineer function that figured out each digit of A for the output digits in reverse. But the part that stumped me was the fact that every single output digit was being reconstructed EXCEPT for the first digit. I spent way too long trying to find the error, and I couldn't. Finally, I just decided to use my brute-force technique, but around the neighborhood of the answer that I got from the almost-correct reverse engineered solution. This actually worked, and gave me the answer.
+
+**Part 1**: Time `00:17:43`, Rank `844`      
+**Part 2**: Time `02:53:46`, Rank `2447`
