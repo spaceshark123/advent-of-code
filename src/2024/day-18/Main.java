@@ -3,13 +3,82 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static int SIZE = 71;
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day18", System.out);
 
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[SIZE][SIZE];
+		for (int i = 0; i < lines.length; i++) {
+			// figure out coordinate x, y
+			int x = Integer.parseInt(lines[i].split(",")[0]);
+			int y = Integer.parseInt(lines[i].split(",")[1]);
+			grid[y][x] = '#';
 
+			// part 1
+			if (i == 1023) {
+				io.println(part1(grid));
+			}
+
+			// part 2
+			boolean possible = part2(grid);
+			if (!possible) {
+				io.println("x: " + x + ", y: " + y); 
+				break;
+			}
+		}
 
 		io.close();
+	}
+
+	static boolean part2(char[][] grid) {
+		// use floodfill from top left to bottom right and see if it is possible to reach bottom right
+		int[][] dirs = new int[][] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+		Queue<int[]> q = new LinkedList<>();
+		q.add(new int[] { 0, 0 });
+		boolean[][] visited = new boolean[SIZE][SIZE];
+		visited[0][0] = true;
+		while (!q.isEmpty()) {
+			int[] curr = q.poll();
+			for (int[] dir : dirs) {
+				int x = curr[0] + dir[0];
+				int y = curr[1] + dir[1];
+				if (x >= 0 && x < SIZE && y >= 0 && y < SIZE && grid[y][x] != '#' && !visited[y][x]) {
+					visited[y][x] = true;
+					q.add(new int[] { x, y });
+				}
+			}
+		}
+		return visited[SIZE - 1][SIZE - 1];
+	}
+
+	static int part1(char[][] grid) {
+		// use dijkstra/BFS to find length of shortest path between top left (0, 0) and bottom right (SIZE-1, SIZE-1).
+		int[][] dirs = new int[][] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+		Queue<int[]> q = new LinkedList<>();
+		q.add(new int[] { 0, 0 });
+		int[][] dist = new int[SIZE][SIZE];
+		for (int i = 0; i < SIZE; i++) {
+			Arrays.fill(dist[i], Integer.MAX_VALUE);
+		}
+		dist[0][0] = 0;
+		while (!q.isEmpty()) {
+			int[] curr = q.poll();
+			for (int[] dir : dirs) {
+				int x = curr[0] + dir[0];
+				int y = curr[1] + dir[1];
+				if (x >= 0 && x < SIZE && y >= 0 && y < SIZE && grid[y][x] != '#' && dist[y][x] == Integer.MAX_VALUE) {
+					dist[y][x] = Math.min(dist[y][x], dist[curr[1]][curr[0]] + 1);
+					if(x == SIZE - 1 && y == SIZE - 1) {
+						return dist[y][x];
+					}
+					q.add(new int[] { x, y });
+				}
+			}
+		}
+		return dist[SIZE - 1][SIZE - 1];
 	}
 
 	static class Kattio extends PrintWriter {

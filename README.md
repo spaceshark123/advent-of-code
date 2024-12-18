@@ -22,6 +22,7 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 15](#day-15) | [Website](https://adventofcode.com/2024/day/15)
 - [Day 16](#day-16) | [Website](https://adventofcode.com/2024/day/16)
 - [Day 17](#day-17) | [Website](https://adventofcode.com/2024/day/17)
+- [Day 18](#day-18) | [Website](https://adventofcode.com/2024/day/18)
 
 # Summary by Day
 
@@ -145,3 +146,10 @@ Absolutely gory problem. Part 1 started innocently enough, creating a simple vir
 
 **Part 1**: Time `00:17:43`, Rank `844`      
 **Part 2**: Time `02:53:46`, Rank `2447`
+
+### Day 18
+
+Very easy day today and nice change of pace! I just used a simple BFS/Dijkstra search to find the length of the shortest path for part 1, and a floodfill to find the first obstacle that makes a solution impossible. I got 300 rank, which is a new best!
+
+**Part 1**: Time `00:07:20`, Rank `400`      
+**Part 2**: Time `00:10:09`, Rank `300`
