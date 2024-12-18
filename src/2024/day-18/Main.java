@@ -19,7 +19,8 @@ class Main {
 
 			// part 1
 			if (i == 1023) {
-				io.println(part1(grid));
+				io.println("part 1 optimal solution: " + part1(grid));
+				io.println("part 1 A* solution: " + part1_aStar(grid));
 			}
 
 			// part 2
@@ -79,6 +80,40 @@ class Main {
 			}
 		}
 		return dist[SIZE - 1][SIZE - 1];
+	}
+
+	static int part1_aStar(char[][] grid) {
+		// use A* instead of dijkstra/BFS to maybe speed up the process?
+		int[][] dirs = new int[][] { { 0, 1 }, { 1, 0 }, { 0, -1 }, { -1, 0 } };
+		PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> (a[2] + a[3]) - (b[2] + b[3]));
+		pq.add(new int[] { 0, 0, 0, heuristic(0, 0) });
+		int[][] dist = new int[SIZE][SIZE];
+		for (int i = 0; i < SIZE; i++) {
+			Arrays.fill(dist[i], Integer.MAX_VALUE);
+		}
+		dist[0][0] = 0;
+		while (!pq.isEmpty()) {
+			int[] curr = pq.poll();
+			for (int[] dir : dirs) {
+				int x = curr[0] + dir[0];
+				int y = curr[1] + dir[1];
+				if (x >= 0 && x < SIZE && y >= 0 && y < SIZE && grid[y][x] != '#' && dist[y][x] == Integer.MAX_VALUE) {
+					if (dist[y][x] > dist[curr[1]][curr[0]] + 1) {
+						dist[y][x] = dist[curr[1]][curr[0]] + 1;
+						pq.add(new int[] { x, y, dist[y][x], heuristic(x, y) });
+					}
+					if (x == SIZE - 1 && y == SIZE - 1) {
+						return dist[y][x];
+					}
+				}
+			}
+		}
+		return dist[SIZE - 1][SIZE - 1];
+	}
+
+	static int heuristic(int x, int y) {
+		// manhattan distance from x, y to SIZE-1, SIZE-1
+		return Math.abs(SIZE - 1 - x) + Math.abs(SIZE - 1 - y);
 	}
 
 	static class Kattio extends PrintWriter {

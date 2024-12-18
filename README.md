@@ -149,7 +149,7 @@ Absolutely gory problem. Part 1 started innocently enough, creating a simple vir
 
 ### Day 18
 
-Very easy day today and nice change of pace! I just used a simple BFS/Dijkstra search to find the length of the shortest path for part 1, and a floodfill to find the first obstacle that makes a solution impossible. I got 300 rank, which is a new best!
+Very easy day today and nice change of pace! I just used a simple BFS/Dijkstra search to find the length of the shortest path for part 1, and a floodfill to find the first obstacle that makes a solution impossible. I got 300 rank, which is a new best! Since I was starting to see 2D pathfinding pop up a lot, I looked into the A* algorithm, which combines the distance with a heuristic to prioritize looking in the direction towards the target. However, this didn't produce the optimal solution (2 cells longer than the best path), so I had to stick with the original solution.
 
 **Part 1**: Time `00:07:20`, Rank `400`      
 **Part 2**: Time `00:10:09`, Rank `300`
