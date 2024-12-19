@@ -153,3 +153,10 @@ Very easy day today and nice change of pace! I just used a simple BFS/Dijkstra s
 
 **Part 1**: Time `00:07:20`, Rank `400`      
 **Part 2**: Time `00:10:09`, Rank `300`
+
+### Day 19
+
+Pretty simple solution, using dynamic programming to get the number of ways to create each pattern using the towels, counting the nonzero results for part 1, and summing the results for part 2. I tried to use more of a functional programming approach for today, making extensive use of my favorite Java feature (Java streams) to streamline the pipeline process.
+
+**Part 1**: Time `00:27:04`, Rank `3334`      
+**Part 2**: Time `00:33:04`, Rank `2571`

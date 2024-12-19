@@ -1,15 +1,76 @@
 import java.util.*;
+import java.util.stream.*;
 import java.io.*;
 import java.lang.*;
 
 class Main {
+	static HashMap<String, Long> memo = new HashMap<>();
+
 	public static void main(String[] args) throws IOException {
-		// read input from file
 		Kattio io = new Kattio("day19", System.out);
 
+		// initial dp
+		memo.put("", 0L);
 
+		// input		
+		String[] lines = io.getAll().split("\n");
+		String[] towels = lines[0].split(", ");
+		String[] patterns = Arrays.copyOfRange(lines, 2, lines.length);
+
+		// solve problem
+		long[] numWays = solve(towels, patterns);
+
+		// isolate the two parts of the solution
+		long part1 = Arrays.stream(numWays).filter(i -> i != 0).count(); // count possible patterns
+		long part2 = Arrays.stream(numWays).sum(); // count total number of ways to make all patterns
+
+		// print output
+		io.println(part1);
+		io.println(part2);
 
 		io.close();
+	}
+
+	static long[] solve(String[] towels, String[] patterns) {
+		return IntStream.range(0, patterns.length)
+						.mapToLong(i -> canMakePattern(towels, patterns[i]))
+						.toArray();
+	}
+
+	static long canMakePattern(String[] towels, String pattern) {
+		// check how many ways the pattern can be made by combining the towels
+		if (pattern.length() == 0) {
+			return 0; 
+		}
+		if (memo.containsKey(pattern)) {
+			return memo.get(pattern); // return memoized value if available
+		}
+		// check if pattern starts with any towel
+		boolean startsWith = false;
+		for (String towel : towels) {
+			if (pattern.startsWith(towel)) {
+				startsWith = true;
+				break;
+			}
+		}
+		if (!startsWith) {
+			memo.put(pattern, 0L);
+			return 0; // pattern doesn't start with any towel, so it can't be made
+		}
+		// check how many ways the pattern can be made by combining the towels recursively
+		long count = 0;
+		for (int i = 0; i < towels.length; i++) {
+			if (pattern.startsWith(towels[i])) {
+				if (pattern.length() == towels[i].length()) {
+					count++;
+				} else {
+					long s = canMakePattern(towels, pattern.substring(towels[i].length()));
+					count += s;
+				}
+			}
+		}
+		memo.put(pattern, count);
+		return count;
 	}
 
 	static class Kattio extends PrintWriter {
