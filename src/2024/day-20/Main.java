@@ -7,9 +7,216 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day20", System.out);
 
-		
+		// input
+		String[] lines = io.getAll().split("\n");
+		char[][] grid = new char[lines.length][lines[0].length()];
+		for (int i = 0; i < lines.length; i++) {
+			grid[i] = lines[i].toCharArray();
+		}
+
+		// part 1
+		long part1 = part1(grid);
+		System.out.println(part1);
+
+		// part 2
+		long part2 = part2(grid);
+		System.out.println(part2);
 
 		io.close();
+	}
+
+	static long part1(char[][] grid) {
+		// Find the starting point
+		int startRow = -1;
+		int startCol = -1;
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				if (grid[i][j] == 'S') {
+					startRow = i;
+					startCol = j;
+					break;
+				}
+			}
+		}
+		// bfs to find shortest path to E
+		long shortestPath = bfs(grid, startRow, startCol);
+		// find all deletions of a single # that will shorten the shortest path by >=100
+		int count = 0;
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				// if it is a wall and it is next to 2 empty spaces, check if removing it will shorten the shortest path by >=100
+				if (grid[i][j] == '#') {
+					int countEmpty = 0;
+					if (i - 1 >= 0 && grid[i - 1][j] == '.') {
+						countEmpty++;
+					}
+					if (i + 1 < grid.length && grid[i + 1][j] == '.') {
+						countEmpty++;
+					}
+					if (j - 1 >= 0 && grid[i][j - 1] == '.') {
+						countEmpty++;
+					}
+					if (j + 1 < grid[0].length && grid[i][j + 1] == '.') {
+						countEmpty++;
+					}
+					if (countEmpty < 2) {
+						continue;
+					}
+					// remove the wall and check if the shortest path is >=100 shorter
+					grid[i][j] = '.';
+					long newshortestPath = bfs(grid, startRow, startCol);
+					if (newshortestPath <= shortestPath - 100) {
+						count++;
+					}
+					grid[i][j] = '#';
+				}
+			}
+		}
+		return count+1;
+	}
+
+	static long part2(char[][] grid) {
+		// Find the starting point
+		int startRow = -1;
+		int startCol = -1;
+		for (int i = 0; i < grid.length; i++) {
+			for (int j = 0; j < grid[0].length; j++) {
+				if (grid[i][j] == 'S') {
+					startRow = i;
+					startCol = j;
+					break;
+				}
+			}
+		}
+		// bfs to find shortest path to all empty cells
+		long shortestPath = -1;
+		int count = 0;
+		long[][] dp = new long[grid.length][grid[0].length];
+		Queue<int[]> queue = new LinkedList<>();
+		queue.add(new int[] { startRow, startCol, 0 });
+		boolean[][] visited = new boolean[grid.length][grid[0].length];
+		visited[startRow][startCol] = true;
+		while (!queue.isEmpty()) {
+			int[] curr = queue.poll();
+			int row = curr[0];
+			int col = curr[1];
+			int dist = curr[2];
+			dp[row][col] = dist;
+			if (grid[row][col] == 'E') {
+				shortestPath = dist;
+				break;
+			}
+			// Try moving up
+			if (row - 1 >= 0 && grid[row - 1][col] != '#' && !visited[row - 1][col]) {
+				queue.add(new int[] { row - 1, col, dist + 1 });
+				visited[row - 1][col] = true;
+			}
+			// Try moving down
+			if (row + 1 < grid.length && grid[row + 1][col] != '#' && !visited[row + 1][col]) {
+				queue.add(new int[] { row + 1, col, dist + 1 });
+				visited[row + 1][col] = true;
+			}
+			// Try moving left
+			if (col - 1 >= 0 && grid[row][col - 1] != '#' && !visited[row][col - 1]) {
+				queue.add(new int[] { row, col - 1, dist + 1 });
+				visited[row][col - 1] = true;
+			}
+			// Try moving right
+			if (col + 1 < grid[0].length && grid[row][col + 1] != '#' && !visited[row][col + 1]) {
+				queue.add(new int[] { row, col + 1, dist + 1 });
+				visited[row][col + 1] = true;
+			}
+		}
+		// for all pairs of empty cells less than 20 manhattan steps away, check if the traveled distance is <= shortestPath - 100
+		for(int i = 0; i < grid.length; i++) {
+			for(int j = 0; j < grid[0].length; j++) {
+				if(grid[i][j] != '#') {
+					// find all other empty cells that are less than 20 manhattan steps away (dont have to be connected)
+					List<int[]> possibleEnds = new ArrayList<>();
+					queue = new LinkedList<>();
+					queue.add(new int[] { i, j, 0 });
+					visited = new boolean[grid.length][grid[0].length];
+					visited[i][j] = true;
+					while (!queue.isEmpty()) {
+						int[] curr = queue.poll();
+						int row = curr[0];
+						int col = curr[1];
+						int dist = curr[2];
+						if (dist > 20) {
+							continue;
+						}
+						if (grid[row][col] != '#') {
+							possibleEnds.add(new int[] { row, col, dist });
+						}
+						// Try moving up
+						if (row - 1 >= 0 && !visited[row - 1][col]) {
+							queue.add(new int[] { row - 1, col, dist + 1 });
+							visited[row - 1][col] = true;
+						}
+						// Try moving down
+						if (row + 1 < grid.length && !visited[row + 1][col]) {
+							queue.add(new int[] { row + 1, col, dist + 1 });
+							visited[row + 1][col] = true;
+						}
+						// Try moving left
+						if (col - 1 >= 0 && !visited[row][col - 1]) {
+							queue.add(new int[] { row, col - 1, dist + 1 });
+							visited[row][col - 1] = true;
+						}
+						// Try moving right
+						if (col + 1 < grid[0].length && !visited[row][col + 1]) {
+							queue.add(new int[] { row, col + 1, dist + 1 });
+							visited[row][col + 1] = true;
+						}
+					}
+					// check if diff <= 100
+					for(int[] end : possibleEnds) {
+						long diff = (dp[end[0]][end[1]] - dp[i][j]) - end[2];
+						if (100 <= diff) {
+							count++;
+						}
+					}
+				}
+			}
+		}
+		return count;
+	}
+
+	static long bfs(char[][] grid, int startRow, int startCol) {
+		Queue<int[]> queue = new LinkedList<>();
+		queue.add(new int[] { startRow, startCol, 0 });
+		boolean[][] visited = new boolean[grid.length][grid[0].length];
+		visited[startRow][startCol] = true;
+		while (!queue.isEmpty()) {
+			int[] curr = queue.poll();
+			int row = curr[0];
+			int col = curr[1];
+			int dist = curr[2];
+			if (grid[row][col] == 'E') {
+				return dist;
+			}
+			// Try moving up
+			if (row - 1 >= 0 && grid[row - 1][col] != '#' && !visited[row - 1][col]) {
+				queue.add(new int[] { row - 1, col, dist + 1 });
+				visited[row - 1][col] = true;
+			}
+			// Try moving down
+			if (row + 1 < grid.length && grid[row + 1][col] != '#' && !visited[row + 1][col]) {
+				queue.add(new int[] { row + 1, col, dist + 1 });
+				visited[row + 1][col] = true;
+			}
+			// Try moving left
+			if (col - 1 >= 0 && grid[row][col - 1] != '#' && !visited[row][col - 1]) {
+				queue.add(new int[] { row, col - 1, dist + 1 });
+				visited[row][col - 1] = true;
+			}
+			// Try moving right
+			if (col + 1 < grid[0].length && grid[row][col + 1] != '#' && !visited[row][col + 1]) {
+				queue.add(new int[] { row, col + 1, dist + 1 });
+				visited[row][col + 1] = true;
+			}
+		}
+		return -1;
 	}
 
 	static class Kattio extends PrintWriter {

@@ -23,6 +23,7 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 16](#day-16) | [Website](https://adventofcode.com/2024/day/16)
 - [Day 17](#day-17) | [Website](https://adventofcode.com/2024/day/17)
 - [Day 18](#day-18) | [Website](https://adventofcode.com/2024/day/18)
+- [Day 19](#day-19) | [Website](https://adventofcode.com/2024/day/19)
 
 # Summary by Day
 
@@ -160,3 +161,10 @@ Pretty simple solution, using dynamic programming to get the number of ways to c
 
 **Part 1**: Time `00:27:04`, Rank `3334`      
 **Part 2**: Time `00:33:04`, Rank `2571`
+
+### Day 20
+
+Interesting problem! I finished part 1 really fast using a brute force approach that did some heavy pruning before the actual computations, which got me 165th rank (new PB! and very close to top 100 as well!). But part 2 had me stumped. I fixated on trying to compute the possible wall pairs and computing the path between them that could form a valid shortcut, but that logic was not only convoluted but also didnt take into account the fact that you could cheat over empty cells as well. I finally figured out that I could just think of it as pairs of empty cells with a manhattan distance less than 20 and directly compute the difference for each. The rank disparity between my part 1 and part 2 performance has been more apparent recently.
+
+**Part 1**: Time `00:11:14`, Rank `165`      
+**Part 2**: Time `01:56:45`, Rank `2910`
