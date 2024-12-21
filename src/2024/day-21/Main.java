@@ -3,13 +3,286 @@ import java.io.*;
 import java.lang.*;
 
 class Main {
+	static class Keypad {
+		char[][] keypad;
+	}
+
+	static class Robot {
+		Keypad keypadToPress;
+		Keypad thisKeypad;
+		int x;
+		int y;
+
+		public void init() {
+			// find A in keypadToPress
+			for (int i = 0; i < keypadToPress.keypad.length; i++) {
+				for (int j = 0; j < keypadToPress.keypad[i].length; j++) {
+					if (keypadToPress.keypad[i][j] == 'A') {
+						x = j;
+						y = i;
+						return;
+					}
+				}
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public List<String> type(String code) {
+			// find the coordinates of the '.'
+			int xDot = -1;
+			int yDot = -1;
+			for (int i = 0; i < keypadToPress.keypad.length; i++) {
+				for (int j = 0; j < keypadToPress.keypad[i].length; j++) {
+					if (keypadToPress.keypad[i][j] == '.') {
+						xDot = j;
+						yDot = i;
+						break;
+					}
+				}
+			}
+			ArrayList<String>[] instructions = new ArrayList[code.length()]; // stores all possible instructions for each character in code
+			for (int i = 0; i < code.length(); i++) {
+				char c = code.charAt(i);
+				// figure out how to move from current position to c on keypadToPress
+				int xToPress = -1;
+				int yToPress = -1;
+				for (int j = 0; j < keypadToPress.keypad.length; j++) {
+					for (int k = 0; k < keypadToPress.keypad[j].length; k++) {
+						if (keypadToPress.keypad[j][k] == c) {
+							xToPress = k;
+							yToPress = j;
+							break;
+						}
+					}
+				}
+				// move from current position to xToPress, yToPress but you cant go over '.'
+				StringBuilder thisInstructions = new StringBuilder();
+				
+				int x = this.x;
+				int y = this.y;
+				boolean xFirstValid = true;
+				while (x != xToPress) {
+					if (x < xToPress) {
+						thisInstructions.append('>');
+						x++;
+					} else {
+						thisInstructions.append('<');
+						x--;
+					}
+					if (keypadToPress.keypad[y][x] == '.') {
+						//System.out.println("Error: tried to move over '.'");
+						xFirstValid = false;
+						break;
+					}
+				}
+				while (y != yToPress && xFirstValid) {
+					if (y < yToPress) {
+						thisInstructions.append('v');
+						y++;
+					} else {
+						thisInstructions.append('^');
+						y--;
+					}
+					if (keypadToPress.keypad[y][x] == '.') {
+						//System.out.println("Error: tried to move over '.'");
+						xFirstValid = false;
+						break;
+					}
+				}
+				thisInstructions.append('A'); // press the key
+				instructions[i] = new ArrayList<>();
+				if (xFirstValid) {
+					instructions[i].add(thisInstructions.toString());
+				}
+
+				// now, try doing y first and add to instructions
+				//if (this.x != xToPress) {
+					x = this.x;
+					y = this.y;
+					boolean yFirstValid = true;
+					thisInstructions = new StringBuilder();
+					while (y != yToPress) {
+						if (y < yToPress) {
+							thisInstructions.append('v');
+							y++;
+						} else {
+							thisInstructions.append('^');
+							y--;
+						}
+						if (keypadToPress.keypad[y][x] == '.') {
+							//System.out.println("Error: tried to move over '.'");
+							yFirstValid = false;
+							break;
+						}
+					}
+					while (x != xToPress && yFirstValid) {
+						if (x < xToPress) {
+							thisInstructions.append('>');
+							x++;
+						} else {
+							thisInstructions.append('<');
+							x--;
+						}
+						if (keypadToPress.keypad[y][x] == '.') {
+							//System.out.println("Error: tried to move over '.'");
+							yFirstValid = false;
+							break;
+						}
+					}
+					thisInstructions.append('A'); // press the key
+					if (yFirstValid) {
+						instructions[i].add(thisInstructions.toString());
+					}
+				//}
+
+				if (instructions[i].size() == 2 && instructions[i].get(0).equals(instructions[i].get(1))) {
+					instructions[i].remove(1); // remove duplicate
+				}
+				this.x = xToPress;
+				this.y = yToPress;
+			}
+			// find all permutations of instructions and add to possibleInstructions
+			List<String> results = new ArrayList<>();
+			generatePermutations(instructions, 0, "", results);
+
+			return results;
+		}
+
+		// generate all permutations of the instructions
+		public static void generatePermutations(List<String>[] lists, int index, String current, List<String> results) {
+			if (index == lists.length) {
+				results.add(current); // Base case: when all lists are processed, add the concatenated result
+				return;
+			}
+
+			// Iterate through each string in the current list
+			for (String str : lists[index]) {
+				generatePermutations(lists, index + 1, current + str, results);
+			}
+		}
+
+		public String getCode(String instructions) {
+			// simulate typing the instructions and return the code 
+			Keypad keypad = new Keypad();
+			// copy keypadToPress to keypad
+			keypad.keypad = new char[keypadToPress.keypad.length][keypadToPress.keypad[0].length];
+			for (int i = 0; i < keypadToPress.keypad.length; i++) {
+				for (int j = 0; j < keypadToPress.keypad[i].length; j++) {
+					keypad.keypad[i][j] = keypadToPress.keypad[i][j];
+				}
+			}
+			int x = this.x;
+			int y = this.y;
+			StringBuilder code = new StringBuilder();
+			for (int i = 0; i < instructions.length(); i++) {
+				char c = instructions.charAt(i);
+				if (c == '^') {
+					y--;
+				} else if (c == 'v') {
+					y++;
+				} else if (c == '<') {
+					x--;
+				} else if (c == '>') {
+					x++;
+				} else {
+					// press the key
+					code.append(keypad.keypad[y][x]);
+				}
+			}
+			return code.toString();
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day21", System.out);
 
+		// input
+		String[] lines = io.getAll().split("\n");
 
+		// part 1
+		long part1 = part1(lines);
+		System.out.println("Part 1: " + part1);
 
 		io.close();
+	}
+
+	static long part1(String[] lines) {
+		long sum = 0;
+		for (int i = 0; i < lines.length; i++) {
+			sum += solve(lines[i], 2);
+		}
+		return sum;
+	}
+
+	static long solve(String code, int numRobots) {
+		Keypad original = new Keypad();
+		original.keypad = new char[][] {
+				{ '7', '8', '9' },
+				{ '4', '5', '6' },
+				{ '1', '2', '3' },
+				{ '.', '0', 'A' }
+		};
+
+		Robot robot1 = new Robot();
+		robot1.keypadToPress = original;
+		Keypad robot1Keypad = new Keypad();
+		robot1Keypad.keypad = new char[][] {
+				{ '.', '^', 'A' },
+				{ '<', 'v', '>' }
+		};
+		robot1.thisKeypad = robot1Keypad;
+		// make robot1 start at the A of the previous keypad
+		robot1.init();
+		List<String> instructions1 = robot1.type(code);
+		//System.out.println(instructions1);
+
+		// repeat for numRobots - 1 more robots
+		Robot[] robots = new Robot[25];
+		List<String> prevInstructions = instructions1;
+		long startTime = System.currentTimeMillis();
+		for (int j = 0; j < numRobots; j++) {
+			System.out.println("code " + code + " robot " + j + " parsing " + prevInstructions.size()
+					+ " instructions of length " + prevInstructions.get(0).length());
+			robots[j] = new Robot();
+			robots[j].keypadToPress = j == 0 ? robot1.thisKeypad : robots[j - 1].thisKeypad;
+			Keypad robotKeypad = new Keypad();
+			robotKeypad.keypad = new char[][] {
+					{ '.', '^', 'A' },
+					{ '<', 'v', '>' }
+			};
+			robots[j].thisKeypad = robotKeypad;
+			// make robot start at the A of the previous keypad
+			robots[j].init();
+			List<String> instructions = new ArrayList<>();
+			for (String instruction : prevInstructions) {
+				instructions.addAll(robots[j].type(instruction));
+			}
+			prevInstructions = instructions;
+		}
+		long endTime = System.currentTimeMillis();
+		System.out.println("Time taken: " + (endTime - startTime) + "ms");
+
+		// get min length
+		int length = Integer.MAX_VALUE;
+		int minIndex = -1;
+		for (int j = 0; j < prevInstructions.size(); j++) {
+			if (prevInstructions.get(j).length() < length) {
+				length = prevInstructions.get(j).length();
+				minIndex = j;
+			}
+		}
+		System.out.println(prevInstructions.get(minIndex));
+
+		// find numeric part of lines[i]
+		String numeric = "";
+		for (int j = 0; j < code.length(); j++) {
+			if (Character.isDigit(code.charAt(j))) {
+				numeric += code.charAt(j);
+			}
+		}
+		int n = Integer.parseInt(numeric);
+		return length * n;
 	}
 
 	static class Kattio extends PrintWriter {
