@@ -1,15 +1,134 @@
 import java.util.*;
+import java.util.stream.IntStream;
 import java.io.*;
 import java.lang.*;
 
 class Main {
+	static class ArrayWrapper {
+		long[] arr;
+
+		public ArrayWrapper(long[] arr) {
+			this.arr = arr;
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			ArrayWrapper that = (ArrayWrapper) o;
+			return Arrays.equals(arr, that.arr);
+		}
+
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(arr);
+		}
+	}
+
 	public static void main(String[] args) throws IOException {
 		// read input from file
 		Kattio io = new Kattio("day22", System.out);
 
-		
+		String[] lines = io.getAll().split("\n");
+		long[] arr = new long[lines.length];
+		long sum = 0;
+		for (int i = 0; i < lines.length; i++) {
+			long n = Long.parseLong(lines[i]);
+			arr[i] = n;
+			long ans = part1(n);
+			sum += ans;
+		}
+
+		// part 1
+		System.out.println(sum);
+
+		// part 2
+		long start = System.currentTimeMillis();
+		io.println(part2(arr));
+		long end = System.currentTimeMillis();
+		System.out.println("Time: " + (end - start) + "ms");
 
 		io.close();
+	}
+
+	static long part1(long n) {
+		for (int i = 0; i < 2000; i++) {
+			n ^= n << 6; // multiply by 64
+			n %= 16777216;
+
+			n ^= n >> 5; // divide by 32
+			n %= 16777216;
+
+			n ^= n << 11; // multiply by 2048
+			n %= 16777216;
+		}
+		return n;
+	}
+
+	static long part2(long[] arr) {
+		// 2000 steps
+		long[][] diffs = new long[arr.length][2000];
+		long[][] prices = new long[arr.length][2001];
+		for (int i = 0; i < 2000; i++) {
+			// step forward all buyers
+			if (i == 0) {
+				for(int j = 0; j < arr.length; j++) {
+					prices[j][0] = arr[j] % 10;
+				}
+			}
+			for(int j = 0; j < arr.length; j++) {
+				long n = arr[j];
+				long old = n % 10;
+				n ^= n << 6; // multiply by 64
+				n %= 16777216;
+
+				n ^= n >> 5; // divide by 32
+				n %= 16777216;
+
+				n ^= n << 11; // multiply by 2048
+				n %= 16777216;
+				arr[j] = n;
+
+				long price = n % 10;
+				// find diff
+				long diff = price - old;
+
+				diffs[j][i] = diff;
+				prices[j][i+1] = price;
+			}
+		}
+
+		// find sequence of 4 diffs that come before the max price sum for all buyers
+		HashSet<ArrayWrapper> seqs = new HashSet<>(); // store all distinct sequences of 4 diffs
+		for (int k = 0; k < arr.length; k++) {
+			for (int l = 0; l < 2000 - 4; l++) {
+				long[] seq = new long[4];
+				for (int m = 0; m < 4; m++) {
+					seq[m] = diffs[k][l + m];
+				}
+				seqs.add(new ArrayWrapper(seq));
+			}
+		}
+		System.out.println(seqs.size() + " sequences");
+
+		return seqs.stream().parallel().mapToLong(s -> IntStream.range(0, arr.length)
+				.mapToLong(j -> {
+					// find the first occurence of the sequence in diffs, then add the price right after
+					for (int k = 0; k < 2000 - 4; k++) {
+						boolean found = true;
+						for (int l = 0; l < 4; l++) {
+							if (diffs[j][k + l] != s.arr[l]) {
+								found = false;
+								break;
+							}
+						}
+						if (found) {
+							return prices[j][k + 4];
+						}
+					}
+					return 0;
+				})
+				.sum()).max().getAsLong();
 	}
 
 	static class Kattio extends PrintWriter {
