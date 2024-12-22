@@ -1,8 +1,12 @@
 import java.util.*;
+import java.util.function.LongFunction;
+import java.util.stream.Stream;
 import java.io.*;
 import java.lang.*;
 
 class Main {
+	static HashMap<String, Long> memo = new HashMap<>(); // store the min length of instructions for each code
+
 	static class Keypad {
 		char[][] keypad;
 	}
@@ -23,6 +27,146 @@ class Main {
 						return;
 					}
 				}
+			}
+		}
+
+		@SuppressWarnings("unchecked")
+		public String type2(String code) {
+			// find the coordinates of the '.'
+			int xDot = -1;
+			int yDot = -1;
+			for (int i = 0; i < keypadToPress.keypad.length; i++) {
+				for (int j = 0; j < keypadToPress.keypad[i].length; j++) {
+					if (keypadToPress.keypad[i][j] == '.') {
+						xDot = j;
+						yDot = i;
+						break;
+					}
+				}
+			}
+			StringBuilder instructions = new StringBuilder(code.length()*3);
+			for (int i = 0; i < code.length(); i++) {
+				instructions.append(type2char(code.charAt(i)));
+			}
+			// find all permutations of instructions and add to possibleInstructions
+
+			return instructions.toString();
+		}
+
+		public String type2char(char c) {
+			// figure out how to move from current position to c on keypadToPress
+			int xToPress = -1;
+			int yToPress = -1;
+			for (int j = 0; j < keypadToPress.keypad.length; j++) {
+				for (int k = 0; k < keypadToPress.keypad[j].length; k++) {
+					if (keypadToPress.keypad[j][k] == c) {
+						xToPress = k;
+						yToPress = j;
+						break;
+					}
+				}
+			}
+			if (this.x == xToPress && this.y == yToPress) {
+				return "A";
+			}
+			// move from current position to xToPress, yToPress but you cant go over '.'
+			StringBuilder thisInstructions = new StringBuilder(3);
+
+			int x = this.x;
+			int y = this.y;
+			boolean xFirstValid = true;
+			while (x != xToPress) {
+				if (x < xToPress) {
+					thisInstructions.append('>');
+					x++;
+				} else {
+					thisInstructions.append('<');
+					x--;
+				}
+				if (keypadToPress.keypad[y][x] == '.') {
+					//System.out.println("Error: tried to move over '.'");
+					xFirstValid = false;
+					break;
+				}
+			}
+			while (y != yToPress && xFirstValid) {
+				if (y < yToPress) {
+					thisInstructions.append('v');
+					y++;
+				} else {
+					thisInstructions.append('^');
+					y--;
+				}
+				if (keypadToPress.keypad[y][x] == '.') {
+					//System.out.println("Error: tried to move over '.'");
+					xFirstValid = false;
+					break;
+				}
+			}
+			thisInstructions.append('A'); // press the key
+			String xFirst = thisInstructions.toString();
+
+			// now, try doing y first and add to instructions
+			//if (this.x != xToPress) {
+			x = this.x;
+			y = this.y;
+			boolean yFirstValid = true;
+			thisInstructions.setLength(0);
+			while (y != yToPress) {
+				if (y < yToPress) {
+					thisInstructions.append('v');
+					y++;
+				} else {
+					thisInstructions.append('^');
+					y--;
+				}
+				if (keypadToPress.keypad[y][x] == '.') {
+					//System.out.println("Error: tried to move over '.'");
+					yFirstValid = false;
+					break;
+				}
+			}
+			while (x != xToPress && yFirstValid) {
+				if (x < xToPress) {
+					thisInstructions.append('>');
+					x++;
+				} else {
+					thisInstructions.append('<');
+					x--;
+				}
+				if (keypadToPress.keypad[y][x] == '.') {
+					//System.out.println("Error: tried to move over '.'");
+					yFirstValid = false;
+					break;
+				}
+			}
+			thisInstructions.append('A'); // press the key
+			String yFirst = thisInstructions.toString();
+			//}
+			this.x = xToPress;
+			this.y = yToPress;
+			if (xFirstValid && yFirstValid) {
+				String code1 = xFirst;
+				String code2 = yFirst;
+				long length1 = memo.get(code1);
+				long length2 = memo.get(code2);
+				if (length1 == Long.MAX_VALUE && length2 == Long.MAX_VALUE) {
+					// both are new, no need to remove any
+					return code1;
+				} else {
+					if (length1 < length2) {
+						return code1;
+					} else {
+						return code2;
+					}
+				}
+			} else if (xFirstValid) {
+				return xFirst;
+			} else if (yFirstValid) {
+				return yFirst;
+			} else {
+				// both are invalid
+				return xFirst;
 			}
 		}
 
@@ -138,6 +282,22 @@ class Main {
 				if (instructions[i].size() == 2 && instructions[i].get(0).equals(instructions[i].get(1))) {
 					instructions[i].remove(1); // remove duplicate
 				}
+				// choose the one with the shortest length in memo
+				if (instructions[i].size() == 2) {
+					String code1 = instructions[i].get(0);
+					String code2 = instructions[i].get(1);
+					long length1 = memo.getOrDefault(code1, Long.MAX_VALUE);
+					long length2 = memo.getOrDefault(code2, Long.MAX_VALUE);
+					if(length1 == Long.MAX_VALUE && length2 == Long.MAX_VALUE) {
+						// both are new, no need to remove any
+					} else {
+						if (length1 < length2) {
+							instructions[i].remove(1);
+						} else {
+							instructions[i].remove(0);
+						}
+					}
+				}
 				this.x = xToPress;
 				this.y = yToPress;
 			}
@@ -200,18 +360,186 @@ class Main {
 		// input
 		String[] lines = io.getAll().split("\n");
 
+		// fill memo
+		fillMemo();
+
 		// part 1
 		long part1 = part1(lines);
 		System.out.println("Part 1: " + part1);
 
+		// part 2
+		long part2 = part2(lines);
+		System.out.println("Part 2: " + part2);
+
 		io.close();
 	}
 
-	static long part1(String[] lines) {
-		long sum = 0;
-		for (int i = 0; i < lines.length; i++) {
-			sum += solve(lines[i], 2);
+	static void fillMemo() {
+		// iterate through all permutations of ^v<> chars 3 long and find the min length of instructions
+		// generate all permutations of ^v<> chars 3 long
+		BaseIterator it = new BaseIterator(4, 3);
+		int[] perm;
+		while (it.hasNext()) {
+			perm = it.next();
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < perm.length; i++) {
+				if (perm[i] == 0) {
+					sb.append('^');
+				} else if (perm[i] == 1) {
+					sb.append('v');
+				} else if (perm[i] == 2) {
+					sb.append('<');
+				} else {
+					sb.append('>');
+				}
+			}
+			sb.append('A');
+			Keypad original = new Keypad();
+			original.keypad = new char[][] {
+					{ '.', '^', 'A' },
+					{ '<', 'v', '>' }
+			};
+			String code = "A"+sb.toString();
+			List<String> prevInstructions = List.of(code);
+			Robot[] robots = new Robot[3];
+			for (int j = 0; j < 3; j++) {
+				//System.out.println("code " + code + " robot " + j + " parsing " + prevInstructions.size() + " instructions of length " + prevInstructions.get(0).length());
+				robots[j] = new Robot();
+				robots[j].keypadToPress = j == 0 ? original : robots[j - 1].thisKeypad;
+				Keypad robotKeypad = new Keypad();
+				robotKeypad.keypad = new char[][] {
+						{ '.', '^', 'A' },
+						{ '<', 'v', '>' }
+				};
+				robots[j].thisKeypad = robotKeypad;
+				// make robot start at the A of the previous keypad
+				robots[j].init();
+				List<String> instructions = new ArrayList<>();
+				for (String instruction : prevInstructions) {
+					instructions.addAll(robots[j].type(instruction));
+				}
+				prevInstructions = instructions;
+			}
+			// get min length
+			int length = Integer.MAX_VALUE;
+			int minIndex = -1;
+			for (int j = 0; j < prevInstructions.size(); j++) {
+				if (prevInstructions.get(j).length() < length) {
+					length = prevInstructions.get(j).length();
+					minIndex = j;
+				}
+			}
+			memo.put(code.substring(1), (long) length);
 		}
+		it = new BaseIterator(4, 2);
+		while (it.hasNext()) {
+			perm = it.next();
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < perm.length; i++) {
+				if (perm[i] == 0) {
+					sb.append('^');
+				} else if (perm[i] == 1) {
+					sb.append('v');
+				} else if (perm[i] == 2) {
+					sb.append('<');
+				} else {
+					sb.append('>');
+				}
+			}
+			sb.append('A');
+			Keypad original = new Keypad();
+			original.keypad = new char[][] {
+					{ '.', '^', 'A' },
+					{ '<', 'v', '>' }
+			};
+			String code = "A"+sb.toString();
+			List<String> prevInstructions = List.of(code);
+			Robot[] robots = new Robot[3];
+			for (int j = 0; j < 3; j++) {
+				//System.out.println("code " + code + " robot " + j + " parsing " + prevInstructions.size() + " instructions of length " + prevInstructions.get(0).length());
+				robots[j] = new Robot();
+				robots[j].keypadToPress = j == 0 ? original : robots[j - 1].thisKeypad;
+				Keypad robotKeypad = new Keypad();
+				robotKeypad.keypad = new char[][] {
+						{ '.', '^', 'A' },
+						{ '<', 'v', '>' }
+				};
+				robots[j].thisKeypad = robotKeypad;
+				// make robot start at the A of the previous keypad
+				robots[j].init();
+				List<String> instructions = new ArrayList<>();
+				for (String instruction : prevInstructions) {
+					instructions.addAll(robots[j].type(instruction));
+				}
+				prevInstructions = instructions;
+			}
+			// get min length
+			int length = Integer.MAX_VALUE;
+			int minIndex = -1;
+			for (int j = 0; j < prevInstructions.size(); j++) {
+				if (prevInstructions.get(j).length() < length) {
+					length = prevInstructions.get(j).length();
+					minIndex = j;
+				}
+			}
+			memo.put(code.substring(1), (long) length);
+		}
+		it = new BaseIterator(4, 1);
+		while (it.hasNext()) {
+			perm = it.next();
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < perm.length; i++) {
+				if (perm[i] == 0) {
+					sb.append('^');
+				} else if (perm[i] == 1) {
+					sb.append('v');
+				} else if (perm[i] == 2) {
+					sb.append('<');
+				} else {
+					sb.append('>');
+				}
+			}
+			sb.append("A");
+			Keypad original = new Keypad();
+			original.keypad = new char[][] {
+					{ '.', '^', 'A' },
+					{ '<', 'v', '>' }
+			};
+			String code = "A"+sb.toString();
+			List<String> prevInstructions = List.of(code);
+			Robot[] robots = new Robot[3];
+			for (int j = 0; j < 3; j++) {
+				//System.out.println("code " + code + " robot " + j + " parsing " + prevInstructions.size() + " instructions of length " + prevInstructions.get(0).length());
+				robots[j] = new Robot();
+				robots[j].keypadToPress = j == 0 ? original : robots[j - 1].thisKeypad;
+				Keypad robotKeypad = new Keypad();
+				robotKeypad.keypad = new char[][] {
+						{ '.', '^', 'A' },
+						{ '<', 'v', '>' }
+				};
+				robots[j].thisKeypad = robotKeypad;
+				// make robot start at the A of the previous keypad
+				robots[j].init();
+				List<String> instructions = new ArrayList<>();
+				for (String instruction : prevInstructions) {
+					instructions.addAll(robots[j].type(instruction));
+				}
+				prevInstructions = instructions;
+			}
+			// get min length
+			int length = prevInstructions.stream().mapToInt(String::length).min().getAsInt();
+			memo.put(code.substring(1), (long) length);
+		}
+		//System.out.println(memo);
+	}
+
+	static long part1(String[] lines) {
+		long sum = Stream.of(lines).mapToLong(code -> solve(code, 2)).sum();
+		return sum;
+	}
+
+	static long part2(String[] lines) {
+		long sum = Stream.of(lines).mapToLong(code -> solve(code, 25)).sum();
 		return sum;
 	}
 
@@ -234,16 +562,15 @@ class Main {
 		robot1.thisKeypad = robot1Keypad;
 		// make robot1 start at the A of the previous keypad
 		robot1.init();
-		List<String> instructions1 = robot1.type(code);
+		String instructions1 = robot1.type2(code);
 		//System.out.println(instructions1);
 
 		// repeat for numRobots - 1 more robots
 		Robot[] robots = new Robot[25];
-		List<String> prevInstructions = instructions1;
+		String prevInstructions = instructions1;
 		long startTime = System.currentTimeMillis();
 		for (int j = 0; j < numRobots; j++) {
-			System.out.println("code " + code + " robot " + j + " parsing " + prevInstructions.size()
-					+ " instructions of length " + prevInstructions.get(0).length());
+			System.out.println("code " + code + " robot " + j + " parsing length " + prevInstructions.length());
 			robots[j] = new Robot();
 			robots[j].keypadToPress = j == 0 ? robot1.thisKeypad : robots[j - 1].thisKeypad;
 			Keypad robotKeypad = new Keypad();
@@ -254,25 +581,15 @@ class Main {
 			robots[j].thisKeypad = robotKeypad;
 			// make robot start at the A of the previous keypad
 			robots[j].init();
-			List<String> instructions = new ArrayList<>();
-			for (String instruction : prevInstructions) {
-				instructions.addAll(robots[j].type(instruction));
-			}
-			prevInstructions = instructions;
+			prevInstructions = robots[j].type2(prevInstructions);
 		}
 		long endTime = System.currentTimeMillis();
 		System.out.println("Time taken: " + (endTime - startTime) + "ms");
 
 		// get min length
-		int length = Integer.MAX_VALUE;
-		int minIndex = -1;
-		for (int j = 0; j < prevInstructions.size(); j++) {
-			if (prevInstructions.get(j).length() < length) {
-				length = prevInstructions.get(j).length();
-				minIndex = j;
-			}
-		}
-		System.out.println(prevInstructions.get(minIndex));
+		System.out.println("length of instruction: " + prevInstructions.length());
+		int length = prevInstructions.length();
+		//System.out.println(prevInstructions.get(minIndex));
 
 		// find numeric part of lines[i]
 		String numeric = "";
@@ -281,8 +598,8 @@ class Main {
 				numeric += code.charAt(j);
 			}
 		}
-		int n = Integer.parseInt(numeric);
-		return length * n;
+		long n = Long.parseLong(numeric);
+		return (long)length * n;
 	}
 
 	static class Kattio extends PrintWriter {
