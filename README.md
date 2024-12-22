@@ -24,7 +24,9 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 17](#day-17) | [Website](https://adventofcode.com/2024/day/17)
 - [Day 18](#day-18) | [Website](https://adventofcode.com/2024/day/18)
 - [Day 19](#day-19) | [Website](https://adventofcode.com/2024/day/19)
-
+- [Day 20](#day-20) | [Website](https://adventofcode.com/2024/day/20)
+- [Day 21](#day-21) | [Website](https://adventofcode.com/2024/day/21)
+- [Day 22](#day-22) | [Website](https://adventofcode.com/2024/day/22)
 # Summary by Day
 
 ## 2024
@@ -168,3 +170,17 @@ Interesting problem! I finished part 1 really fast using a brute force approach 
 
 **Part 1**: Time `00:11:14`, Rank `165`      
 **Part 2**: Time `01:56:45`, Rank `2910`
+
+### Day 21
+
+I finally reached my limit. Today was the first day that I just couldn't solve, even after looking at the solutions and failing to understand them. Part 1 was straightforward, then part 2 involved scaling up part 1 from 2 to 25 robots, and with the exponential time complexity, this was simply infeasible. The only breakthrough I made was using memoization to store the optimal order for each key sub-sequence, which reduced the number strings to 1, but the issue was that the strings were just getting too long for Java or my PC to handle. I even tried running it with 10GB of allocated RAM, but I could only get up to ~18 robots before a memory overflow occurred. I later found out that the length of the strings would have ran into the billions, and would have needed over 100 gigs of RAM to even store. Everyone seemed to struggle with this problem.
+
+**Part 1**: Time `01:22:51`, Rank `828`      
+**Part 2**: Time `DNF`, Rank `DNF`
+
+### Day 22
+
+Really simple problem! Part 1 was a simple simulation problem, which I later changed to use bitwise shifts instead of divisions/multiplications. Part 2 involved a simple brute force after calculating all unique sequences of 4 diffs, which I parallelized using Java Streams once again. got sub-500 rank for part 1.
+
+**Part 1**: Time `00:04:59`, Rank `383`      
+**Part 2**: Time `00:25:31`, Rank `596`
