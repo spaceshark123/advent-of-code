@@ -27,6 +27,8 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 20](#day-20) | [Website](https://adventofcode.com/2024/day/20)
 - [Day 21](#day-21) | [Website](https://adventofcode.com/2024/day/21)
 - [Day 22](#day-22) | [Website](https://adventofcode.com/2024/day/22)
+- [Day 23](#day-23) | [Website](https://adventofcode.com/2024/day/23)
+
 # Summary by Day
 
 ## 2024
@@ -184,3 +186,10 @@ Really simple problem! Part 1 was a simple simulation problem, which I later cha
 
 **Part 1**: Time `00:04:59`, Rank `383`      
 **Part 2**: Time `00:25:31`, Rank `596`
+
+### Day 23
+
+We finally got an actual graph problem! Luckily, I had already prepared a GraphNode utility class beforehand, so it was pretty easy to set up the graph. Part 1 involved a simple 3-cycle check while part 2 was more involved, and I had to use BFS to construct all fully-connected groups within the entire graph, and then sort and output the biggest one. Pretty good rank! Tonight will probably be my last night competing for leaderboards, as I'll be leaving for vacation tomorrow.
+
+**Part 1**: Time `00:04:56`, Rank `384`      
+**Part 2**: Time `00:21:24`, Rank `822`

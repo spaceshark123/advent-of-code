@@ -13,9 +13,87 @@ class Main {
 		// read input from file
 		Kattio io = new Kattio("day23", System.out);
 
+		// input
+		String[] lines = io.getAllArr();
+		ArrayList<GraphNode<String>> nodes = new ArrayList<>();
+		for (String line : lines) {
+			String node1 = line.split("-")[0];
+			String node2 = line.split("-")[1];
+			GraphNode<String> n1 = nodes.stream().filter(n -> n.data.equals(node1)).findFirst().orElse(null);
+			GraphNode<String> n2 = nodes.stream().filter(n -> n.data.equals(node2)).findFirst().orElse(null);
+			// add nodes if they don't exist
+			if (n1 == null) {
+				nodes.add(n1 = new GraphNode<>(node1));
+			}
+			if (n2 == null) {
+				nodes.add(n2 = new GraphNode<>(node2));
+			}
+			// add edge between node1 and node2
+			n1.neighbors.add(n2);
+			n2.neighbors.add(n1);
+		}
 
+		// part 1
+		long part1 = timeIt(() -> io.println(part1(nodes)));
+
+		// part 2
+		long part2 = timeIt(() -> io.println(part2(nodes)));
 
 		io.close();
+	}
+
+	static long part1(ArrayList<GraphNode<String>> nodes) {
+		// find all 3-cycles
+		long count = 0;
+		for (GraphNode<String> node : nodes) {
+			for (GraphNode<String> neighbor : node.neighbors) {
+				for (GraphNode<String> neighbor2 : neighbor.neighbors) {
+					if ((node.data.charAt(0) == 't' || neighbor.data.charAt(0) == 't' || neighbor2.data.charAt(0) == 't') && neighbor2.neighbors.contains(node)) {
+						// one of the nodes must start with a t
+						count++;
+					}
+				}
+			}
+		}
+		return count / 6; // each cycle is counted 6 times
+	}
+
+	static String part2(ArrayList<GraphNode<String>> nodes) {
+		// find largest group of all connected nodes
+		long maxSize = 0;
+		List<GraphNode<String>> maxGroup = new ArrayList<>();
+		for (GraphNode<String> node : nodes) {
+			HashMap<GraphNode<String>, Boolean> visited = new HashMap<>(); // store all nodes in the group
+			Queue<GraphNode<String>> q = new LinkedList<>();
+			visited.put(node, true);
+			q.add(node);
+			// only add neighbors to visited if they are connected to all nodes in visited
+			while (!q.isEmpty()) {
+				GraphNode<String> curr = q.poll();
+				for (GraphNode<String> n : curr.neighbors) {
+					if (!visited.containsKey(n)) {
+						boolean connected = true;
+						for (GraphNode<String> v : visited.keySet()) {
+							if (!v.neighbors.contains(n)) {
+								connected = false;
+								break;
+							}
+						}
+						if (connected) {
+							visited.put(n, true);
+							q.add(n);
+						}
+					}
+				}
+			}
+			if (visited.size() > maxSize) {
+				maxSize = visited.size();
+				maxGroup = new ArrayList<>(visited.keySet());
+			}
+		}
+		// sort in alphabetical order and separate by commas into a string
+		maxGroup.sort((a, b) -> a.data.compareTo(b.data));
+		return maxGroup.stream().map(n -> n.data).collect(Collectors.joining(","));
 	}
 
 	static class Kattio extends PrintWriter {
@@ -384,13 +462,66 @@ class Main {
 		}
 	}
 
-	public static class GraphNode<T> {
+	public static class GraphNode<T> implements Comparable<GraphNode<T>> {
 		public T data;
 		public ArrayList<GraphNode<T>> neighbors;
+		boolean useRef; // whether to use reference equality for equals and hashCode
 
-		public GraphNode(T data) {
+		public GraphNode(T data, boolean useRef) {
 			this.data = data;
 			this.neighbors = new ArrayList<GraphNode<T>>();
+			this.useRef = useRef;
+		}
+
+		public GraphNode(T data) {
+			this(data, false);
+		}
+
+		@Override
+		public String toString() {
+			return data.toString();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (useRef) {
+				return this == obj;
+			}
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			GraphNode<?> other = (GraphNode<?>) obj;
+			if (data == null) {
+				if (other.data != null) {
+					return false;
+				}
+			} else if (!data.equals(other.data)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			if (useRef) {
+				return System.identityHashCode(this);
+			}
+			return data == null ? 0 : data.hashCode();
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public int compareTo(GraphNode<T> o) {
+			if (data instanceof Comparable) {
+				return ((Comparable<T>) data).compareTo(o.data);
+			}
+			return 0;
 		}
 	}
 
