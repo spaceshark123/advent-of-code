@@ -372,6 +372,44 @@ class Main {
 			this.left = null;
 			this.right = null;
 		}
+
+		public TreeNode(T data, TreeNode<T> left, TreeNode<T> right) {
+			this.data = data;
+			this.left = left;
+			this.right = right;
+		}
+
+		@Override
+		public String toString() {
+			return data.toString();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			TreeNode<?> other = (TreeNode<?>) obj;
+			if (data == null) {
+				if (other.data != null) {
+					return false;
+				}
+			} else if (!data.equals(other.data)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return data == null ? 0 : data.hashCode();
+		}
 	}
 
 	public static class LinkedNode<T> {
@@ -382,15 +420,115 @@ class Main {
 			this.data = data;
 			this.next = null;
 		}
+
+		public LinkedNode(T data, LinkedNode<T> next) {
+			this.data = data;
+			this.next = next;
+		}
+
+		@Override
+		public String toString() {
+			return data.toString();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			LinkedNode<?> other = (LinkedNode<?>) obj;
+			if (data == null) {
+				if (other.data != null) {
+					return false;
+				}
+			} else if (!data.equals(other.data)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			return data == null ? 0 : data.hashCode();
+		}
+
+		public static <T> LinkedNode<T> fromArray(T[] arr) {
+			LinkedNode<T> head = new LinkedNode<>(arr[0]);
+			LinkedNode<T> temp = head;
+			for (int i = 1; i < arr.length; i++) {
+				temp.next = new LinkedNode<>(arr[i]);
+				temp = temp.next;
+			}
+			return head;
+		}
 	}
 
-	public static class GraphNode<T> {
+	public static class GraphNode<T> implements Comparable<GraphNode<T>> {
 		public T data;
 		public ArrayList<GraphNode<T>> neighbors;
+		boolean useRef; // whether to use reference equality for equals and hashCode
 
-		public GraphNode(T data) {
+		public GraphNode(T data, boolean useRef) {
 			this.data = data;
 			this.neighbors = new ArrayList<GraphNode<T>>();
+			this.useRef = useRef;
+		}
+
+		public GraphNode(T data) {
+			this(data, false);
+		}
+
+		@Override
+		public String toString() {
+			return data.toString();
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (useRef) {
+				return this == obj;
+			}
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			GraphNode<?> other = (GraphNode<?>) obj;
+			if (data == null) {
+				if (other.data != null) {
+					return false;
+				}
+			} else if (!data.equals(other.data)) {
+				return false;
+			}
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			if (useRef) {
+				return System.identityHashCode(this);
+			}
+			return data == null ? 0 : data.hashCode();
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public int compareTo(GraphNode<T> o) {
+			if (data instanceof Comparable) {
+				return ((Comparable<T>) data).compareTo(o.data);
+			}
+			return 0;
 		}
 	}
 
