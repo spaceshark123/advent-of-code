@@ -28,6 +28,7 @@ These are my submissions to all the Advent of Code (AoC) challenges that I have 
 - [Day 21](#day-21) | [Website](https://adventofcode.com/2024/day/21)
 - [Day 22](#day-22) | [Website](https://adventofcode.com/2024/day/22)
 - [Day 23](#day-23) | [Website](https://adventofcode.com/2024/day/23)
+- [Day 24](#day-24) | [Website](https://adventofcode.com/2024/day/24)
 
 # Summary by Day
 
@@ -193,3 +194,10 @@ We finally got an actual graph problem! Luckily, I had already prepared a GraphN
 
 **Part 1**: Time `00:04:56`, Rank `384`      
 **Part 2**: Time `00:21:24`, Rank `822`
+
+### Day 24
+
+I came back to AoC after a break, and wow, what a problem to come back to. Today's problem involved circuits and logic gates, which was an interesting hardware-focused change of pace. Part 1 was simple enough, with an easy brute force solution since I didn't want to implement topological sort. But part 2 was crazy complex. Having to find the swapped gates in a full binary adder was not trivial at all. I tried to reverse engineer the incorrect gates by detecting incorrect bits: didn't work. I tried brute forcing all possible 4 pairs with pruning: didn't work. I tried programatically generating a graphviz file to visualize the logic gates and maybe try to manually spot the errors, didn't work. In the end, I couldn't manage to solve part 2.
+
+**Part 1**: Time `>24h`, Rank `25391`      
+**Part 2**: Time `DNF`, Rank `DNF`
